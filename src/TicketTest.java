@@ -16,8 +16,9 @@ public class TicketTest {
 			if(ticket.getAvailable() == true) {
 				System.out.println("Already used");
 			} else {
-//				cs.writeData();
+				System.out.println("Haven't been used");
 				System.out.println(cs.useTicket(11111111, true));
+				cs.writeData();
 			}
 		}
 		

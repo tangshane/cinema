@@ -6,12 +6,17 @@ import java.util.*;
 import Model.*;
 
 public class CinemaSystem {
-	ArrayList<Admin> adminList = new ArrayList<Admin>();
-	ArrayList<TicketInfo> ticketInfoList = new ArrayList<TicketInfo>();
-	ArrayList<Film> filmInfoList = new ArrayList<Film>();
-	ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
-	ArrayList<Timetable> timetableList = new ArrayList<Timetable>();
-	ArrayList<Screen> screenList = new ArrayList<Screen>();
+	// basic
+	public ArrayList<Admin> adminList = new ArrayList<Admin>();
+	public ArrayList<Film> filmInfoList = new ArrayList<Film>();
+	public ArrayList<Screen> screenList = new ArrayList<Screen>();
+	public ArrayList<TicketInfo> ticketInfoList = new ArrayList<TicketInfo>();
+
+	// date
+	public ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
+	public ArrayList<Timetable> timetableList = new ArrayList<Timetable>();
+	// report and ticketnumber.txt
+	
 	Screen seats = null;
 	
 	public void readData() throws Exception {
@@ -21,29 +26,11 @@ public class CinemaSystem {
 			String[] s = reader.nextLine().split("]]]]");
 			adminList.add(new Admin(s[0], s[1]));
 		}
-		ticketInfoList.clear();
-		reader = new Scanner(new File("basic/TicketInfo.txt"));
-		while (reader.hasNext()) {
-			String[] s = reader.nextLine().split("]]]]");
-			ticketInfoList.add(new TicketInfo(Integer.parseInt(s[0]), s[1], Boolean.parseBoolean(s[2]), Integer.parseInt(s[3])));
-		}
 		filmInfoList.clear();
 		reader = new Scanner(new File("basic/FilmInfo.txt"));
 		while (reader.hasNext()) {
 			String[] s = reader.nextLine().split("]]]]");
 			filmInfoList.add(new Film(s[0], Integer.parseInt(s[1]), s[2]));
-		}
-		ticketList.clear();
-		reader = new Scanner(new File(getCurrentDatePath()+"/Ticket.txt"));
-		while (reader.hasNext()) {
-			String[] s = reader.nextLine().split("]]]]");
-			ticketList.add(new Ticket(Integer.parseInt(s[0]), Boolean.parseBoolean(s[1])));
-		}
-		timetableList.clear();
-		reader = new Scanner(new File(getCurrentDatePath()+"/Timetable.txt"));
-		while (reader.hasNext()) {
-			String[] s = reader.nextLine().split("]]]]");
-			timetableList.add(new Timetable(Integer.parseInt(s[0]), s[1], s[2]));
 		}
 		reader = new Scanner(new File("basic/Screen.txt"));
 		int line = 0;
@@ -69,6 +56,24 @@ public class CinemaSystem {
 				line = 0;
 				screenList.add(new Screen(number, row, col, seat));				
 			}
+		}
+		ticketInfoList.clear();
+		reader = new Scanner(new File("basic/TicketInfo.txt"));
+		while (reader.hasNext()) {
+			String[] s = reader.nextLine().split("]]]]");
+			ticketInfoList.add(new TicketInfo(Integer.parseInt(s[0]), s[1], Boolean.parseBoolean(s[2]), Integer.parseInt(s[3])));
+		}
+		ticketList.clear();
+		reader = new Scanner(new File(getCurrentDatePath()+"/Ticket.txt"));
+		while (reader.hasNext()) {
+			String[] s = reader.nextLine().split("]]]]");
+			ticketList.add(new Ticket(Integer.parseInt(s[0]), Boolean.parseBoolean(s[1])));
+		}
+		timetableList.clear();
+		reader = new Scanner(new File(getCurrentDatePath()+"/Timetable.txt"));
+		while (reader.hasNext()) {
+			String[] s = reader.nextLine().split("]]]]");
+			timetableList.add(new Timetable(Integer.parseInt(s[0]), s[1], s[2]));
 		}
 		reader.close();
 	}
@@ -296,25 +301,30 @@ public class CinemaSystem {
 		for (int i = 0; i < adminList.size(); i++) {
 			output.write(adminList.get(i).toString() + "\r\n");
 		}
-		output = new BufferedWriter(new FileWriter("basic/TicketInfo.txt"));
-		for (int i = 0; i < ticketInfoList.size(); i++) {
-			output.write(ticketInfoList.get(i).toString() + "\r\n");
-		}
+		output.close();
 		output = new BufferedWriter(new FileWriter("basic/FilmInfo.txt"));
 		for (int i = 0; i < filmInfoList.size(); i++) {
 			output.write(filmInfoList.get(i).toString() + "\r\n");
 		}
+		output.close();
+		output = new BufferedWriter(new FileWriter("basic/Screen.txt"));
+		for (int i = 0; i < screenList.size(); i++) {
+			output.write(screenList.get(i).toString() + "\r\n");
+		}
+		output.close();
+		output = new BufferedWriter(new FileWriter("basic/TicketInfo.txt"));
+		for (int i = 0; i < ticketInfoList.size(); i++) {
+			output.write(ticketInfoList.get(i).toString() + "\r\n");
+		}
+		output.close();
 		output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/Ticket.txt"));
 		for (int i = 0; i < ticketList.size(); i++) {
 			output.write(ticketList.get(i).toString() + "\r\n");
 		}
+		output.close();
 		output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/Timetable.txt"));
 		for (int i = 0; i < timetableList.size(); i++) {
 			output.write(timetableList.get(i).toString() + "\r\n");
-		}
-		output = new BufferedWriter(new FileWriter("basic/Screen.txt"));
-		for (int i = 0; i < screenList.size(); i++) {
-			output.write(screenList.get(i).toString() + "\r\n");
 		}
 		output.close();
 	}
@@ -324,49 +334,49 @@ public class CinemaSystem {
 		String path = String.format("%4d%02d%02d", 1900+date.getYear(), date.getMonth()+1, date.getDate());
 		return path;
 	}
-	
-	public static void main(String args[]) throws IOException {
-		CinemaSystem cs = new CinemaSystem();
-		try {
-			cs.readData();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		for(int i = 0; i<cs.ticketInfoList.size(); i++) {
-			if(cs.ticketInfoList.get(i).getType() == 1)
-				System.out.print("Child\t");	
-			else if(cs.ticketInfoList.get(i).getType() == 2)
-				System.out.print("Adult\t");	
-			else if(cs.ticketInfoList.get(i).getType() == 3)
-				System.out.print("Senior\t");	
-			else if(cs.ticketInfoList.get(i).getType() == 4)
-				System.out.print("Student\t");	
-			System.out.print(cs.ticketInfoList.get(i).getDescription()+"\t");
-			if(cs.ticketInfoList.get(i).isIDRequired() == false)
-				System.out.print("None\t");
-			else
-				System.out.print("Student ID\t");
-			if(cs.ticketInfoList.get(i).getDiscount() == 0)
-				System.out.println("None");
-			else
-				System.out.println(cs.ticketInfoList.get(i).getDiscount()+"%");
-		}
-		
-		for(int i = 0; i<cs.filmInfoList.size(); i++) {
-			System.out.println(cs.filmInfoList.get(i).getName() + "\t" + cs.filmInfoList.get(i).getRuntime()+" min"); 
-//			File sourceimage = new File("basic/poster/" + cs.filmInfoList.get(i).getPoster());
-//			Image image = ImageIO.read(sourceimage);
-//			JFrame frame = new JFrame();
-//		    JLabel label = new JLabel(new ImageIcon(image));
-//		    frame.getContentPane().add(label, BorderLayout.CENTER);
-//		    frame.pack();
-//		    frame.setVisible(true); 
-//		    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		}
-		System.out.println(cs.ticketList.size());
-		for(int i = 0; i<cs.ticketList.size(); i++) {
-			System.out.println(cs.ticketList.get(i));
-		}
-	}
+//	
+//	public static void main(String args[]) throws IOException {
+//		CinemaSystem cs = new CinemaSystem();
+//		try {
+//			cs.readData();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		for(int i = 0; i<cs.ticketInfoList.size(); i++) {
+//			if(cs.ticketInfoList.get(i).getType() == 1)
+//				System.out.print("Child\t");	
+//			else if(cs.ticketInfoList.get(i).getType() == 2)
+//				System.out.print("Adult\t");	
+//			else if(cs.ticketInfoList.get(i).getType() == 3)
+//				System.out.print("Senior\t");	
+//			else if(cs.ticketInfoList.get(i).getType() == 4)
+//				System.out.print("Student\t");	
+//			System.out.print(cs.ticketInfoList.get(i).getDescription()+"\t");
+//			if(cs.ticketInfoList.get(i).isIDRequired() == false)
+//				System.out.print("None\t");
+//			else
+//				System.out.print("Student ID\t");
+//			if(cs.ticketInfoList.get(i).getDiscount() == 0)
+//				System.out.println("None");
+//			else
+//				System.out.println(cs.ticketInfoList.get(i).getDiscount()+"%");
+//		}
+//		
+//		for(int i = 0; i<cs.filmInfoList.size(); i++) {
+//			System.out.println(cs.filmInfoList.get(i).getName() + "\t" + cs.filmInfoList.get(i).getRuntime()+" min"); 
+////			File sourceimage = new File("basic/poster/" + cs.filmInfoList.get(i).getPoster());
+////			Image image = ImageIO.read(sourceimage);
+////			JFrame frame = new JFrame();
+////		    JLabel label = new JLabel(new ImageIcon(image));
+////		    frame.getContentPane().add(label, BorderLayout.CENTER);
+////		    frame.pack();
+////		    frame.setVisible(true); 
+////		    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		}
+//		System.out.println(cs.ticketList.size());
+//		for(int i = 0; i<cs.ticketList.size(); i++) {
+//			System.out.println(cs.ticketList.get(i));
+//		}
+//	}
 }

@@ -53,6 +53,7 @@ public class Screen {
 			}
 			seats = seats.substring(0, seats.length()-4) + "\n";
 		}
+		seats = seats.substring(0, seats.length()-1);
 		return number + "]]]]" + row + "]]]]" + col + "\n" + seats;
 	}
 }
