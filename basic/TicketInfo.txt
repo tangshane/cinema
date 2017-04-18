@@ -1,0 +1,4 @@
+1]]]]2 to 17 years old]]]]false]]]]50
+2]]]]18 years and older]]]]false]]]]0
+3]]]]55 years and older]]]]false]]]]20
+4]]]]18 years and older and in full time education]]]]true]]]]15
