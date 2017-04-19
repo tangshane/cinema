@@ -3,21 +3,36 @@ package Controller;
 import java.io.*;
 import java.util.*;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
 import Model.*;
+import View.*;
 
 public class CinemaSystem {
+	// frame
+	CheckGate checkgate;
+	CheckTicket checkticket;
+	
 	// basic
 	public ArrayList<Admin> adminList = new ArrayList<Admin>();
 	public ArrayList<Film> filmInfoList = new ArrayList<Film>();
 	public ArrayList<Screen> screenList = new ArrayList<Screen>();
 	public ArrayList<TicketInfo> ticketInfoList = new ArrayList<TicketInfo>();
-
+	public Ticket currentticket;
+	
 	// date
 	public ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
 	public ArrayList<Timetable> timetableList = new ArrayList<Timetable>();
 	// report and ticketnumber.txt
 	
 	Screen seats = null;
+	
+	public CinemaSystem() {
+		currentticket = new Ticket();
+		checkgate = new CheckGate(this);
+		checkticket = new CheckTicket(this);
+	}
 	
 	public void readData() throws Exception {
 		adminList.clear();
@@ -135,6 +150,16 @@ public class CinemaSystem {
 		return -1;
 	}
 	
+	public Film getFilm(String name) throws Exception{
+		readData();
+		for(int i = 0; i<filmInfoList.size();i++){
+			if(filmInfoList.get(i).getName().equals(name)){
+				return filmInfoList.get(i);				
+			}
+		}
+		return null;
+	}
+	
 	public boolean deleteFilm(String name) throws Exception {
 		readData();
 		int index = searchFilm(name);
@@ -197,6 +222,19 @@ public class CinemaSystem {
 	
 	public boolean addTimetable(int screen, String filmName, String showtime) throws Exception {
 		readData();
+		for(int i = 0; i<timetableList.size(); i++) {
+			Timetable timetable = timetableList.get(i);
+			Film targetfilm = getFilm(timetable.getFilmName());
+			Film film = getFilm(filmName);
+			String starttime = showtime;
+			String endtime = showtime + film.getRuntime();
+			String targetstart = timetable.getShowtime();
+			String targetend = timetable.getShowtime() + targetfilm.getRuntime();
+			if(compareTime(targetstart, endtime) != -1 || compareTime(targetend, starttime) != 1)
+				continue;
+			else
+				return false;
+		}
 		Timetable timetable = new Timetable(screen, filmName, showtime);
 		timetableList.add(timetable);
 		writeData();	
@@ -275,9 +313,31 @@ public class CinemaSystem {
 		return null;
 	}
 	
-	public boolean useTicket(int number, boolean IDRequire) throws IOException {
-		if(IDRequire == false)
+	public Ticket createTicket(int type, boolean IDRequired, String film, String showtime, int screen, int row, int col) {
+		Ticket ticket = new Ticket();
+		int number = ticket.generateTicketNumber();
+		while(searchTicket(number) != null) {
+			number = ticket.generateTicketNumber();
+		}
+		ticket = new Ticket(number, type, IDRequired, film, showtime, screen, row, col, false);
+		ticketList.add(ticket);
+		return ticket;
+	}
+	
+	public void getTicket(String number) throws FileNotFoundException {
+		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+number+".txt"));
+		String[] s = reader.nextLine().split("]]]]");
+		currentticket = new Ticket(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Boolean.parseBoolean(s[2]), 
+								s[3], s[4], Integer.parseInt(s[5]), Integer.parseInt(s[6]), Integer.parseInt(s[7]), true);
+		reader.close();
+	}
+	
+	public boolean useTicket(String no, boolean IDRequire) throws IOException {
+		if(IDRequire == false) {
+			JOptionPane.showMessageDialog(null, "Please check ID!", "Alert", JOptionPane.ERROR_MESSAGE); 			
 			return false;
+		}
+		int number = Integer.parseInt(no);
 		for(int i = 0; i<ticketList.size(); i++) {
 			if(ticketList.get(i).getNumber() == number) {
 				Ticket ticket = new Ticket(number, true);
@@ -287,12 +347,15 @@ public class CinemaSystem {
 		}
 		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+number+".txt"));
 		String[] s = reader.nextLine().split("]]]]");
-		Ticket ticket = new Ticket(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Boolean.parseBoolean(s[2]), 
+		currentticket = new Ticket(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Boolean.parseBoolean(s[2]), 
 								s[3], s[4], Integer.parseInt(s[5]), Integer.parseInt(s[6]), Integer.parseInt(s[7]), true);
 		reader.close();
 		BufferedWriter output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+number+".txt"));
-		output.write(ticket.toString() + "\r\n");
+		output.write(currentticket.toString() + "\r\n");
 		output.close();
+		writeData();
+		JOptionPane.showMessageDialog(null, "Door open, enjoy your film!", "Alert", JOptionPane.INFORMATION_MESSAGE); 			
+		gotoGate();
 		return true;
 	}
 	
@@ -334,6 +397,90 @@ public class CinemaSystem {
 		String path = String.format("%4d%02d%02d", 1900+date.getYear(), date.getMonth()+1, date.getDate());
 		return path;
 	}
+	
+	public String addTime(String time, String delta) {
+		int hour = Integer.parseInt(time.substring(0,2));
+		int min = Integer.parseInt(time.substring(2));
+		int deltaHour = Integer.parseInt(delta.substring(0,2));
+		int deltaMin = Integer.parseInt(delta.substring(2));
+		int newMin = (min + deltaMin) % 60;
+		int newHour = (hour + deltaHour) + (min + deltaMin) / 60;
+		return new String(newHour + "" + newMin);
+	}
+	
+	public int compareTime(String timeA, String timeB) {
+		int hourA = Integer.parseInt(timeA.substring(0, 2));
+		int hourB = Integer.parseInt(timeB.substring(0, 2));
+		int minA = Integer.parseInt(timeA.substring(2)); 
+		int minB = Integer.parseInt(timeB.substring(2));
+		int newTimeA = hourA * 60 + minA;
+		int newTimeB = hourB * 60 + minB;
+		if(newTimeA > newTimeB)
+			return 1;
+		else if(newTimeA < newTimeB)
+			return -1;
+		else
+			return 0;
+	}
+	
+	public void gotoGate() {
+		checkticket.setVisible(false);
+		checkgate.setLocationRelativeTo(null);
+		checkgate.setVisible(true);
+	}
+	
+	public void GateToTicket(String number) {
+		try {
+			readData();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(number.equals("")) {
+			JOptionPane.showMessageDialog(null, "Please enter ticket number!", "Alert", JOptionPane.ERROR_MESSAGE); 			
+			return;
+		}	
+		int ticketNumber = Integer.parseInt(number);
+		Ticket ticket = searchTicket(ticketNumber);
+		if(ticket == null) {
+			JOptionPane.showMessageDialog(null, "No such a ticket!", "Alert", JOptionPane.ERROR_MESSAGE); 
+		} else if(ticket.getAvailable() == true) {
+			JOptionPane.showMessageDialog(null, "The ticket has been used!", "Alert", JOptionPane.ERROR_MESSAGE);
+		} else {
+			checkgate.setVisible(false);
+			try {
+				getTicket(number);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			String type = "";
+			switch(currentticket.getType()) {
+			case 1:
+				type = "Child";
+				break;
+			case 2:
+				type = "Adult";
+				break;
+			case 3:
+				type = "Senior";
+				break;
+			case 4:
+				type = "Student";
+				break;
+			}
+			checkticket.number.setText(currentticket.getNumber()+"");
+			checkticket.type.setText(type);
+			checkticket.film.setText(currentticket.getFilm());
+			checkticket.showtime.setText(currentticket.getShowtime().substring(0,2)+":"+currentticket.getShowtime().substring(2));
+			checkticket.screen.setText(currentticket.getScreen()+"");
+			checkticket.seat.setText("Row "+currentticket.getRow()+" Col "+currentticket.getCol());
+			if(currentticket.getIDRequired() == false) {
+				checkticket.checkID.disable();
+			}
+			checkticket.setLocationRelativeTo(null);
+			checkticket.setVisible(true);
+		}
+	}
+	
 //	
 //	public static void main(String args[]) throws IOException {
 //		CinemaSystem cs = new CinemaSystem();
@@ -379,4 +526,12 @@ public class CinemaSystem {
 //			System.out.println(cs.ticketList.get(i));
 //		}
 //	}
+	
+	/**
+	* Auto-generated main method to display this JFrame
+	*/
+	public static void main(String args[]) {
+		CinemaSystem cs = new CinemaSystem();
+		cs.gotoGate();
+	}
 }
