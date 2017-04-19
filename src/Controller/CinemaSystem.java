@@ -10,9 +10,19 @@ import Model.*;
 import View.*;
 
 public class CinemaSystem {
-	// frame
+	// check gate frame
 	CheckGate checkgate;
 	CheckTicket checkticket;
+	// kiosk frame
+	KioskWelcome kioskwelcome;
+	KioskFilm kioskfilm;
+	KioskScreen kioskscreen;
+	KioskTime kiosktime;
+	KioskTicket kioskticket;
+	KioskSeat kioskseat;
+	KioskPay kioskpay;
+	KioskFinish kioskfinish;
+	
 	
 	// basic
 	public ArrayList<Admin> adminList = new ArrayList<Admin>();
@@ -32,6 +42,14 @@ public class CinemaSystem {
 		currentticket = new Ticket();
 		checkgate = new CheckGate(this);
 		checkticket = new CheckTicket(this);
+		kioskwelcome = new KioskWelcome(this);
+		kioskfilm = new KioskFilm(this);
+		kioskscreen = new KioskScreen(this);
+		kiosktime = new KioskTime(this);
+		kioskticket = new KioskTicket(this);
+		kioskseat = new KioskSeat(this);
+		kioskpay = new KioskPay(this);
+		kioskfinish = new KioskFinish(this);
 	}
 	
 	public void readData() throws Exception {
@@ -481,6 +499,53 @@ public class CinemaSystem {
 		}
 	}
 	
+	public void gotoWelcome() {
+		kioskfilm.setVisible(false);
+		kioskwelcome.setLocationRelativeTo(null);
+		kioskwelcome.setVisible(true);
+	}
+	
+	public void gotoFilm() {
+		kioskwelcome.setVisible(false);
+		kioskfilm.setLocationRelativeTo(null);
+		kioskfilm.setVisible(true);
+	}
+	
+	public void gotoScreen() {
+		kioskfilm.setVisible(false);
+		kioskscreen.setLocationRelativeTo(null);
+		kioskscreen.setVisible(true);
+	}
+	
+	public void gotoTime() {
+		kioskscreen.setVisible(false);
+		kiosktime.setLocationRelativeTo(null);
+		kiosktime.setVisible(true);
+	}
+	
+	public void gotoTicket() {
+		kiosktime.setVisible(false);
+		kioskticket.setLocationRelativeTo(null);
+		kioskticket.setVisible(true);
+	}
+	
+	public void gotoSeat() {
+		kioskticket.setVisible(false);
+		kioskseat.setLocationRelativeTo(null);
+		kioskseat.setVisible(true);
+	}
+	
+	public void gotoPay() {
+		kioskseat.setVisible(false);
+		kioskpay.setLocationRelativeTo(null);
+		kioskpay.setVisible(true);
+	}
+	
+	public void gotoFinish() {
+		kioskpay.setVisible(false);
+		kioskfinish.setLocationRelativeTo(null);
+		kioskfinish.setVisible(true);
+	}
 //	
 //	public static void main(String args[]) throws IOException {
 //		CinemaSystem cs = new CinemaSystem();
@@ -532,6 +597,9 @@ public class CinemaSystem {
 	*/
 	public static void main(String args[]) {
 		CinemaSystem cs = new CinemaSystem();
-		cs.gotoGate();
+		// check gate
+		//cs.gotoGate();
+		// kiosk
+		cs.gotoWelcome();
 	}
 }
