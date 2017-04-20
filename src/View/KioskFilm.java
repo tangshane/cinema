@@ -79,6 +79,7 @@ public class KioskFilm extends javax.swing.JFrame {
 						new SpinnerListModel(content);
 				filminfo = new JSpinner();
 				filminfo.setModel(filminfoModel);
+				filminfo.setEditor(new JSpinner.DefaultEditor(filminfo));
 			}
 			{
 				jLabel1 = new JLabel();
@@ -87,6 +88,13 @@ public class KioskFilm extends javax.swing.JFrame {
 			{
 				ok = new JButton();
 				ok.setText("OK");
+				ok.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent evt) {
+						//System.out.println("ok.actionPerformed, event="+evt);
+						//TODO add your code for ok.actionPerformed
+						cs.gotoTime(filminfo.getValue().toString());
+					}
+				});
 			}
 			{
 				jScrollPane1 = new JScrollPane();

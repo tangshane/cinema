@@ -56,7 +56,7 @@ public class CheckTicket extends javax.swing.JFrame {
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
 			GroupLayout thisLayout = new GroupLayout((JComponent)getContentPane());
 			getContentPane().setLayout(thisLayout);
-			this.setTitle("Cinema - Checking Ticket");
+			this.setTitle("Cinema - Select your Ticket Type");
 			{
 				jLabel1 = new JLabel();
 				jLabel1.setText("Ticket Information");
