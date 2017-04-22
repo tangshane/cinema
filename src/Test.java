@@ -1,5 +1,6 @@
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Date;
 import java.util.Random;
 import java.util.Vector;
 
@@ -19,6 +20,27 @@ public class Test {
 		String s = "A";
 		System.out.println(s.charAt(0) - 65);
 		System.out.println(c);
+		Date d = new Date();
+		System.out.println(compareTime(1,0,1,1));
+		System.out.println(compareTime(2,0,1,1));
+		System.out.println(compareTime(1,0,1,0));
+		
+		
 	}
+	
+	public static int compareTime(int hourA, int minA, String timetable) {
+		int hourB = Integer.parseInt(timetable.substring(0,2));
+		int minB = Integer.parseInt(timetable.substring(2));
+		if(hourA < hourB) {
+			return -1;			
+		} else if(hourA == hourB){
+			if(minA < minB)
+				return -1;
+			else 
+				return 1;
+		} else {
+			return 1;
+		}
+	}	
 
 }

@@ -54,7 +54,7 @@ public class JButtonEditor extends DefaultCellEditor {
         		String showtime = ((String) table.getValueAt(row, 1)).substring(0,2) + ((String) table.getValueAt(row, 1)).substring(3);
             JOptionPane.showMessageDialog(button, label + ": Screen " +screen+ " " + showtime + " selected!");
             cs.setCurrentTimetable(new Timetable(screen, cs.getCurrentFilm().getName(), showtime));
-            cs.gotoSeat();
+            cs.gotoTicket();
         }
         isPushed = false;
         return label;

@@ -42,6 +42,7 @@ public class KioskPay extends javax.swing.JFrame {
 	private JLabel jLabel4;
 	private JTextField card;
 	private JLabel jLabel3;
+	private JScrollPane jScrollPane1;
 	private JButton back;
 	private JTextField name;
 	private JLabel jLabel2;
@@ -64,11 +65,6 @@ public class KioskPay extends javax.swing.JFrame {
 			{
 				jLabel1 = new JLabel();
 				jLabel1.setText("Please check your information, then pay by debit/credit card");
-			}
-			{
-				ticketModel = new DefaultTableModel();
-				ticket = new JTable();
-				ticket.setModel(ticketModel);
 			}
 			{
 				jLabel2 = new JLabel();
@@ -134,12 +130,59 @@ public class KioskPay extends javax.swing.JFrame {
 					}
 				});
 			}
+			{
+				jScrollPane1 = new JScrollPane();
+				{
+					ticketModel = new DefaultTableModel();
+					ticket = new JTable();
+					jScrollPane1.setViewportView(ticket);
+					ticket.setModel(ticketModel);
+					ticket.setPreferredSize(new java.awt.Dimension(661, 258));
+				}
+			}
+			thisLayout.setHorizontalGroup(thisLayout.createSequentialGroup()
+				.addContainerGap(68, 68)
+				.addGroup(thisLayout.createParallelGroup()
+				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				        .addComponent(jScrollPane1, 0, 664, Short.MAX_VALUE)
+				        .addGap(28))
+				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				        .addGap(24)
+				        .addGroup(thisLayout.createParallelGroup()
+				            .addGroup(thisLayout.createSequentialGroup()
+				                .addGroup(thisLayout.createParallelGroup()
+				                    .addComponent(jLabel5, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE)
+				                    .addComponent(jLabel3, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE)
+				                    .addComponent(jLabel2, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE))
+				                .addGap(41)
+				                .addGroup(thisLayout.createParallelGroup()
+				                    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				                        .addComponent(cvv, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
+				                        .addGap(12))
+				                    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				                        .addComponent(month, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+				                        .addGap(44)
+				                        .addComponent(year, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+				                    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				                        .addComponent(card, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
+				                        .addGap(12))
+				                    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				                        .addComponent(name, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
+				                        .addGap(12)))
+				                .addGap(87)
+				                .addComponent(ok, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE))
+				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				                .addComponent(jLabel4, GroupLayout.PREFERRED_SIZE, 119, GroupLayout.PREFERRED_SIZE)
+				                .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 408, GroupLayout.PREFERRED_SIZE)
+				                .addGap(68)))
+				        .addGap(0, 11, Short.MAX_VALUE)
+				        .addComponent(back, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)))
+				.addContainerGap(40, 40));
 			thisLayout.setVerticalGroup(thisLayout.createSequentialGroup()
 				.addContainerGap(52, 52)
 				.addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE)
-				.addGap(34)
-				.addComponent(ticket, GroupLayout.PREFERRED_SIZE, 239, GroupLayout.PREFERRED_SIZE)
-				.addGap(30)
+				.addComponent(jScrollPane1, 0, 262, Short.MAX_VALUE)
+				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 36, GroupLayout.PREFERRED_SIZE)
 				.addGroup(thisLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 				    .addComponent(name, GroupLayout.Alignment.BASELINE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 				    .addComponent(jLabel2, GroupLayout.Alignment.BASELINE, GroupLayout.PREFERRED_SIZE, 18, GroupLayout.PREFERRED_SIZE))
@@ -163,39 +206,7 @@ public class KioskPay extends javax.swing.JFrame {
 				    .addComponent(jLabel5, GroupLayout.Alignment.BASELINE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
 				.addComponent(back, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addContainerGap(20, Short.MAX_VALUE));
-			thisLayout.setHorizontalGroup(thisLayout.createSequentialGroup()
-				.addContainerGap(98, 98)
-				.addGroup(thisLayout.createParallelGroup()
-				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				        .addComponent(ticket, GroupLayout.PREFERRED_SIZE, 606, GroupLayout.PREFERRED_SIZE)
-				        .addGap(0, 55, Short.MAX_VALUE))
-				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				        .addGroup(thisLayout.createParallelGroup()
-				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addGroup(thisLayout.createParallelGroup()
-				                    .addComponent(jLabel2, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE)
-				                    .addComponent(jLabel3, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE)
-				                    .addComponent(jLabel5, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE))
-				                .addGap(41)
-				                .addGroup(thisLayout.createParallelGroup()
-				                    .addComponent(name, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
-				                    .addComponent(card, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
-				                    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                        .addComponent(month, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-				                        .addGap(44)
-				                        .addComponent(year, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
-				                    .addComponent(cvv, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE))
-				                .addGap(87)
-				                .addComponent(ok, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE))
-				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addComponent(jLabel4, GroupLayout.PREFERRED_SIZE, 119, GroupLayout.PREFERRED_SIZE)
-				                .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 408, GroupLayout.PREFERRED_SIZE)
-				                .addGap(56)))
-				        .addGap(16)
-				        .addComponent(back, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
-				        .addGap(0, 0, Short.MAX_VALUE)))
-				.addContainerGap(41, 41));
+				.addContainerGap(25, 25));
 			pack();
 			this.setSize(800, 600);
 		} catch (Exception e) {

@@ -15,6 +15,7 @@ import Model.*;
 import View.*;
 
 public class CinemaSystem {
+	private static final int fee = 16;
 	// check gate frame
 	CheckGate checkgate;
 	CheckTicket checkticket;
@@ -27,13 +28,20 @@ public class CinemaSystem {
 	KioskPay kioskpay;
 	KioskFinish kioskfinish;
 	// manage frame
+	AdminLogin adminlogin;
+	AdminManage adminmanage;
+	AdminTimetable admintimetable;
+	AdminReport adminreport;
 	
 	// kiosk info
 	Film currentfilm;
 	Timetable currenttimetable;
 	TicketInfo currentticketinfo;
-	int currentrow;
-	int currentcol;
+	int[] currentrow;
+	int[] currentcol;
+	int occupy;
+	int number;
+	Ticket[] newticket;
 	
 	// basic
 	public ArrayList<Admin> adminList = new ArrayList<Admin>();
@@ -41,9 +49,10 @@ public class CinemaSystem {
 	public ArrayList<Screen> screenList = new ArrayList<Screen>();
 	public ArrayList<TicketInfo> ticketInfoList = new ArrayList<TicketInfo>();
 	public Ticket currentticket;
+	public Ticket briefCurrentTicket;
 	
 	// date
-	public ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
+	public ArrayList<Ticket> briefTicketList = new ArrayList<Ticket>();
 	public ArrayList<Timetable> timetableList = new ArrayList<Timetable>();
 	// report and ticketnumber.txt
 	
@@ -60,11 +69,17 @@ public class CinemaSystem {
 		kioskseat = new KioskSeat(this);
 		kioskpay = new KioskPay(this);
 		kioskfinish = new KioskFinish(this);
+		adminlogin = new AdminLogin(this);
+		adminmanage = new AdminManage(this);
+		admintimetable = new AdminTimetable(this);
+		adminreport = new AdminReport(this);
 		currentfilm = new Film();
 		currenttimetable = new Timetable();
 		currentticketinfo = new TicketInfo();
-		currentrow = -1;
-		currentcol = -1;
+		occupy = 0;
+		number = 0;
+		currentrow = new int[0];
+		currentcol = new int[0];
 	}
 	
 	public void setCurrentFilm(Film currentfilm) {
@@ -82,9 +97,8 @@ public class CinemaSystem {
 		this.currentticketinfo = currentticketinfo;
 	}
 	
-	public void setSeat(int row, int col) {
-		this.currentrow = row;
-		this.currentcol = col;
+	public void setNumber(int number) {
+		this.number = number;
 	}
 	
 	public void readData() throws Exception {
@@ -100,6 +114,7 @@ public class CinemaSystem {
 			String[] s = reader.nextLine().split("]]]]");
 			filmInfoList.add(new Film(s[0], Integer.parseInt(s[1]), s[2]));
 		}
+		screenList.clear();
 		reader = new Scanner(new File("basic/Screen.txt"));
 		int line = 0;
 		int row = 0;
@@ -131,11 +146,11 @@ public class CinemaSystem {
 			String[] s = reader.nextLine().split("]]]]");
 			ticketInfoList.add(new TicketInfo(Integer.parseInt(s[0]), s[1], Boolean.parseBoolean(s[2]), Integer.parseInt(s[3])));
 		}
-		ticketList.clear();
+		briefTicketList.clear();
 		reader = new Scanner(new File(getCurrentDatePath()+"/Ticket.txt"));
 		while (reader.hasNext()) {
 			String[] s = reader.nextLine().split("]]]]");
-			ticketList.add(new Ticket(Integer.parseInt(s[0]), Boolean.parseBoolean(s[1])));
+			briefTicketList.add(new Ticket(Integer.parseInt(s[0]), Boolean.parseBoolean(s[1])));
 		}
 		timetableList.clear();
 		reader = new Scanner(new File(getCurrentDatePath()+"/Timetable.txt"));
@@ -147,7 +162,6 @@ public class CinemaSystem {
 	}
 
 	public boolean addAccount(String id, String password) throws Exception {
-		readData();
 		Admin admin = new Admin(id, password);
 		adminList.add(admin);
 		writeData();	
@@ -155,7 +169,6 @@ public class CinemaSystem {
 	}
 
 	public int searchAdmin(String id, String password) throws Exception{
-		readData();
 		for(int i = 0; i<adminList.size();i++){
 			if(adminList.get(i).getID().equals(id) && adminList.get(i).getPassword().equals(password)){
 				return i;				
@@ -165,7 +178,6 @@ public class CinemaSystem {
 	}
 	
 	public boolean deleteAccount(String id, String password) throws Exception {
-		readData();
 		int index = searchAdmin(id, password);
 		if(index == -1) {
 			return false;
@@ -176,7 +188,6 @@ public class CinemaSystem {
 	}
 	
 	public boolean updateAdmin(String id, String password) throws Exception {
-		readData();
 		int index = searchAdmin(id, password);
 		if(index == -1) {
 			return false;
@@ -186,7 +197,6 @@ public class CinemaSystem {
 	}
 	
 	public boolean addFilm(String name, int runtime, String poster) throws Exception {
-		readData();
 		Film film = new Film(name, runtime, poster);
 		filmInfoList.add(film);
 		writeData();	
@@ -194,7 +204,6 @@ public class CinemaSystem {
 	}
 
 	public int searchFilm(String name) throws Exception{
-		readData();
 		for(int i = 0; i<filmInfoList.size();i++){
 			if(filmInfoList.get(i).getName().equals(name)){
 				return i;				
@@ -204,7 +213,6 @@ public class CinemaSystem {
 	}
 	
 	public Film getFilm(String name) throws Exception{
-		readData();
 		for(int i = 0; i<filmInfoList.size();i++){
 			if(filmInfoList.get(i).getName().equals(name)){
 				return filmInfoList.get(i);				
@@ -214,7 +222,6 @@ public class CinemaSystem {
 	}
 	
 	public boolean deleteFilm(String name) throws Exception {
-		readData();
 		int index = searchFilm(name);
 		if(index == -1) {
 			return false;
@@ -225,7 +232,6 @@ public class CinemaSystem {
 	}
 	
 	public boolean updateFilm(String name, int runtime, String poster) throws Exception {
-		readData();
 		int index = searchFilm(name);
 		if(index == -1) {
 			return false;
@@ -235,7 +241,6 @@ public class CinemaSystem {
 	}
 
 	public boolean addTicketInfo(int type, String description, boolean IDRequired, int discount) throws Exception {
-		readData();
 		TicketInfo ticket = new TicketInfo(type, description, IDRequired, discount);
 		ticketInfoList.add(ticket);
 		writeData();	
@@ -243,7 +248,6 @@ public class CinemaSystem {
 	}
 
 	public int searchTicketInfo(int type) throws Exception{
-		readData();
 		for(int i = 0; i<ticketInfoList.size();i++){
 			if(ticketInfoList.get(i).getType() == type){
 				return i;				
@@ -253,7 +257,6 @@ public class CinemaSystem {
 	}
 	
 	public boolean deleteTicketInfo(int type) throws Exception {
-		readData();
 		int index = searchTicketInfo(type);
 		if(index == -1) {
 			return false;
@@ -264,7 +267,6 @@ public class CinemaSystem {
 	}
 	
 	public boolean updateTicketInfo(int type, String description, boolean IDRequired, int discount) throws Exception {
-		readData();
 		int index = searchTicketInfo(type);
 		if(index == -1) {
 			return false;
@@ -273,8 +275,24 @@ public class CinemaSystem {
 		return true;
 	}
 	
+	public ArrayList<Timetable> getTimetable(boolean filter) {
+		if(filter == true) {
+			ArrayList<Timetable> timetable = new ArrayList<Timetable>();
+			Date d = new Date();
+			int hour = d.getHours();
+			int min = d.getMinutes();
+			for(int i = 0; i<timetableList.size(); i++) {
+				Timetable t = timetableList.get(i);
+				if(compareTime(d.getHours(), d.getMinutes(), t.getShowtime()) == -1) {
+					timetable.add(t);
+				}
+			}
+			return timetable;
+		}
+		return timetableList;	
+	}
+	
 	public boolean addTimetable(int screen, String filmName, String showtime) throws Exception {
-		readData();
 		for(int i = 0; i<timetableList.size(); i++) {
 			Timetable timetable = timetableList.get(i);
 			Film targetfilm = getFilm(timetable.getFilmName());
@@ -358,23 +376,108 @@ public class CinemaSystem {
 			return true;
 	}
 	
+	public int availableScreen(String filmname, String showtime) throws FileNotFoundException {
+		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+filmname+"/"+showtime+".txt"));
+		int line = 0;
+		int row = 0;
+		int col = 0;
+		int empty = 0;
+		while (reader.hasNext()) {
+			String[] s = reader.nextLine().split("]]]]");
+			if(line == 0) {
+				number = Integer.parseInt(s[0]);
+				row = Integer.parseInt(s[1]);
+				col = Integer.parseInt(s[2]);
+			}	
+			else {
+				for(int i = 0; i<s.length; i++) {
+					if(s[i].equals("0")) {
+						empty++;
+					}
+				}
+			}
+			line++;
+			if(line == row + 1) {
+				break;
+			}
+		}
+		return empty;
+	}
+	
+	public boolean updateScreen(String filmname, String showtime, int seatrow, int seatcol) throws IOException {
+		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+filmname+"/"+showtime+".txt"));
+		int line = 0;
+		int row = 0;
+		int col = 0;
+		int number = 0;
+		String[][] seat = null;
+		while (reader.hasNext()) {
+			String[] s = reader.nextLine().split("]]]]");
+			if(line == 0) {
+				number = Integer.parseInt(s[0]);
+				row = Integer.parseInt(s[1]);
+				col = Integer.parseInt(s[2]);
+				seat = new String[row][col];
+			}	
+			else {
+				for(int i = 0; i<s.length; i++) {
+					if(line-1 == seatrow && i == seatcol) {
+						seat[line-1][i] = "1";		
+					} else {
+						seat[line-1][i] = s[i];											
+					}
+				}
+			}
+			line++;
+			if(line == row + 1) {
+				seats = new Screen(number, row, col, seat);		
+				break;
+			}
+		}
+		if(seats == null)
+			return false;
+		else {
+			BufferedWriter output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+filmname+"/"+showtime+".txt"));
+			output.write(seats.toString());
+			output.close();
+			return true;
+		}
+	}
+	
 	public Ticket searchTicket(int number) {
-		for(int i = 0; i<ticketList.size(); i++) {
-			if(ticketList.get(i).getNumber() == number)
-				return ticketList.get(i);
+		for(int i = 0; i<briefTicketList.size(); i++) {
+			if(briefTicketList.get(i).getNumber() == number)
+				return briefTicketList.get(i);
 		}
 		return null;
 	}
 	
-	public Ticket createTicket(int type, boolean IDRequired, String film, String showtime, int screen, int row, int col) {
+	public Ticket createTicket(int type, boolean IDRequired, String film, String showtime, int screen, int row, int col){
 		Ticket ticket = new Ticket();
-		int number = ticket.generateTicketNumber();
-		while(searchTicket(number) != null) {
-			number = ticket.generateTicketNumber();
+		int ticketno = ticket.generateTicketNumber();
+		while(searchTicket(ticketno) != null) {
+			ticketno = ticket.generateTicketNumber();
 		}
-		ticket = new Ticket(number, type, IDRequired, film, showtime, screen, row, col, false);
-		ticketList.add(ticket);
-		return ticket;
+		briefCurrentTicket = new Ticket(ticketno, false);
+		briefTicketList.add(briefCurrentTicket);
+		currentticket = new Ticket(ticketno, type, IDRequired, film, showtime, screen, row, col, false);
+		BufferedWriter output;
+		try {
+			output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+ticketno+".txt"));
+			output.write(currentticket.toString());
+			output.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		//System.out.println(getCurrentDatePath()+"/"+ticketno+".txt:"+currentticket.toString());
+		try {
+			updateScreen(film, showtime, row, col);
+			writeData();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return currentticket;
 	}
 	
 	public void getTicket(String number) throws FileNotFoundException {
@@ -391,10 +494,10 @@ public class CinemaSystem {
 			return false;
 		}
 		int number = Integer.parseInt(no);
-		for(int i = 0; i<ticketList.size(); i++) {
-			if(ticketList.get(i).getNumber() == number) {
+		for(int i = 0; i<briefTicketList.size(); i++) {
+			if(briefTicketList.get(i).getNumber() == number) {
 				Ticket ticket = new Ticket(number, true);
-				ticketList.set(i, ticket);
+				briefTicketList.set(i, ticket);
 				break;
 			}
 		}
@@ -434,8 +537,8 @@ public class CinemaSystem {
 		}
 		output.close();
 		output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/Ticket.txt"));
-		for (int i = 0; i < ticketList.size(); i++) {
-			output.write(ticketList.get(i).toString() + "\r\n");
+		for (int i = 0; i < briefTicketList.size(); i++) {
+			output.write(briefTicketList.get(i).toString() + "\r\n");
 		}
 		output.close();
 		output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/Timetable.txt"));
@@ -505,25 +608,11 @@ public class CinemaSystem {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			String type = "";
-			switch(currentticket.getType()) {
-			case 1:
-				type = "Child";
-				break;
-			case 2:
-				type = "Adult";
-				break;
-			case 3:
-				type = "Senior";
-				break;
-			case 4:
-				type = "Student";
-				break;
-			}
+			String type = convertType(currentticket.getType());
 			checkticket.number.setText(currentticket.getNumber()+"");
 			checkticket.type.setText(type);
 			checkticket.film.setText(currentticket.getFilm());
-			checkticket.showtime.setText(currentticket.getShowtime().substring(0,2)+":"+currentticket.getShowtime().substring(2));
+			checkticket.showtime.setText(convertTime(currentticket.getShowtime()));
 			checkticket.screen.setText(currentticket.getScreen()+"");
 			checkticket.seat.setText("Row "+currentticket.getRow()+" Col "+(currentticket.getCol()));
 			if(currentticket.getIDRequired() == false) {
@@ -559,12 +648,12 @@ public class CinemaSystem {
 		Vector<String> title = new Vector<String>();// 列名
 		title.add("Screen"); title.add("Showtime"); title.add("Confirm");
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();  
-		for (int i = 0; i < timetableList.size(); i++) {  
+		for (int i = 0; i < getTimetable(true).size(); i++) {  
             Vector<Object> v = new Vector<Object>();  
-            Timetable t = timetableList.get(i); 
+            Timetable t = getTimetable(true).get(i); 
             if(t.getFilmName().equals(currentfilm.getName())) {
             		v.add(t.getScreen());
-	            v.add(t.getShowtime().substring(0,2)+":"+t.getShowtime().substring(2));
+	            v.add(convertTime(t.getShowtime()));
 	            v.add("Confirm");
 	            data.add(v);  			            	
             }
@@ -577,72 +666,30 @@ public class CinemaSystem {
         kiosktime.timetable.getColumnModel().getColumn(2).setCellEditor(new JButtonEditor(new JCheckBox(), this));       
 	}
 	
-	public void gotoSeat() {
-		System.out.println(currenttimetable);
-		try {
-			searchScreen(currentfilm.getName(), currenttimetable.getShowtime());
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		kioskticket.setVisible(false);
-		kioskseat.seats.removeAll();
-		kioskseat.seats.setLayout(new GridLayout(seats.getRow(), seats.getCol()));
-		for(int i = 0; i<seats.getRow(); i++) {
-			for(int j = 0; j<seats.getCol(); j++) {
-				if(seats.getSeat()[i][j].equals("NULL")) {
-					JLabel empty = new JLabel();
-					kioskseat.seats.add(empty);
-				} else {
-					char row = (char)(seats.getRow() - i + 65);
-					JButton seat = new JButton(row+""+(j+1));
-					kioskseat.seats.add(seat);
-					if(seats.getSeat()[i][j].equals("1")) {
-						seat.setEnabled(false);
-					}
-					seat.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent evt) {
-							//System.out.println("seat.actionPerformed, event="+evt);
-							//TODO add your code for back.actionPerformed
-							currentrow = (seat.getText().charAt(0) - 65);
-							currentcol = Integer.parseInt(seat.getText().substring(1)); 
-							seat.setText("X");
-						}
-					});
-				}
-			}
-		}
-		kioskseat.seats.repaint();
-		kioskseat.setLocationRelativeTo(null);
-		kioskseat.setVisible(true);
-	}
-	
 	public void gotoTicket() {
 		kiosktime.setVisible(false);
+		int available = 0;
+		try {
+			available = availableScreen(currenttimetable.getFilmName(), currenttimetable.getShowtime());
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
+		String[] combobox = new String[available+1];
+		combobox[0] = "";
+		for(int i = 1; i<combobox.length; i++) {
+			combobox[i] = i+"";
+		}
+		kioskticket.numberModel = new DefaultComboBoxModel(combobox);
+		kioskticket.number.setModel(kioskticket.numberModel);
 		Vector<String> title = new Vector<String>();// 列名
 		title.add("Type"); title.add("Description"); title.add("ID Required"); title.add("Discount");
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>(); 
-		String[] type = new String[ticketInfoList.size()];
+		String[] type = new String[ticketInfoList.size()+1];
 		for (int i = 0; i < ticketInfoList.size(); i++) {  
             Vector<Object> v = new Vector<Object>();  
             TicketInfo t = ticketInfoList.get(i);
-            switch(t.getType()) {
-            case 1:
-            		v.add("Child");
-            		type[i] = "Child";
-            		break;
-            case 2:
-            		v.add("Adult");
-            		type[i] = "Adult";
-            		break;
-            case 3:
-            		v.add("Senior");
-            		type[i] = "Senior";
-            		break;
-            case 4:
-            		v.add("Student");
-            		type[i] = "Student";
-            		break;
-            }
+            type[i+1] = convertType(t.getType());
+            v.add(convertType(t.getType()));
             v.add(t.getDescription());
             v.add(t.isIDRequired());
             v.add(t.getDiscount() + "%");
@@ -658,7 +705,7 @@ public class CinemaSystem {
 				//System.out.println("type.actionPerformed, event="+evt);
 				//TODO add your code for type.actionPerformed
 				try {
-					int index = searchTicketInfo((int)kioskticket.type.getSelectedIndex()+1);
+					int index = searchTicketInfo((int)kioskticket.type.getSelectedIndex());
 					setCurrentTicketInfo(ticketInfoList.get(index));
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -670,28 +717,89 @@ public class CinemaSystem {
 		kioskticket.setVisible(true);
 	}
 	
-	public void gotoPay() {
-		kioskseat.setVisible(false);
-		String tickettype = "";
-        switch(currentticketinfo.getType()) {
-        case 1:
-        		tickettype = "Child";
-			break;
-		case 2:
-			tickettype = "Adult";
-			break;
-		case 3:
-			tickettype = "Senior";
-			break;
-		case 4:
-			tickettype = "Student";
-			break;
+	public void gotoSeat() {
+		setNumber(kioskticket.number.getSelectedIndex());
+		try {
+			searchScreen(currentfilm.getName(), currenttimetable.getShowtime());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
-        String[][] content = new String[][]{{"Type",tickettype}, {"Film", currentfilm.getName()},
-        		{"Showtime", currenttimetable.getShowtime()}, {"Screen", currenttimetable.getScreen()+""}, 
-        		{"Seat",currentrow +":"+ currentcol}};
-        kioskpay.ticketModel = new DefaultTableModel(content,new String[]{"title","content"});
+		kioskticket.setVisible(false);
+		kioskseat.seats.removeAll();
+		kioskseat.seats.setLayout(new GridLayout(seats.getRow(), seats.getCol()));
+		occupy = 0;
+		currentrow = new int[number];
+		currentcol = new int[number];		
+		for(int i = 0; i<seats.getRow(); i++) {
+			for(int j = 0; j<seats.getCol(); j++) {
+				if(seats.getSeat()[i][j].equals("NULL")) {
+					JLabel empty = new JLabel();
+					kioskseat.seats.add(empty);
+				} else {
+					JButton seat = new JButton(convertSeat(seats.getRow(), seats.getCol(), i, j));
+					kioskseat.seats.add(seat);
+					if(seats.getSeat()[i][j].equals("1")) {
+						seat.setEnabled(false);
+					}
+					seat.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent evt) {
+							//System.out.println("seat.actionPerformed, event="+evt);
+							//TODO add your code for back.actionPerformed
+							if(number!=occupy) {
+								currentrow[occupy] = extractSeat(seat.getText())[0];
+								currentcol[occupy] = extractSeat(seat.getText())[1]; 
+								seat.setText("X");
+								occupy++;
+							} else {
+								JOptionPane.showMessageDialog(null, "You have already selected all of your seats.", "Alert", JOptionPane.ERROR_MESSAGE); 			
+							}
+						}
+					});
+				}
+			}
+		}
+		kioskseat.seats.repaint();
+		kioskseat.setLocationRelativeTo(null);
+		kioskseat.setVisible(true);
+	}
+	
+	public void gotoPay() {
+		if(number!=occupy) {
+			JOptionPane.showMessageDialog(null, "Please choose your seats! " + (number - occupy) + "/" + number +"left.", "Alert", JOptionPane.ERROR_MESSAGE); 			
+			return ;
+		}
+		kioskticket.setVisible(false);
+		String tickettype = convertType(currentticketinfo.getType());
+		String[][] content = new String[number*7][2];
+		for(int i = 0; i<number; i++) {
+        		content[7*i][0] = "Ticket No.";
+        		content[7*i][1] = "TBA";
+        		
+        		content[7*i+1][0] = "Type";
+        		content[7*i+1][1] = tickettype;
+
+        		content[7*i+2][0] = "Film";
+        		content[7*i+2][1] = currentfilm.getName();
+
+        		content[7*i+3][0] = "Showtime";
+        		content[7*i+3][1] = currenttimetable.getShowtime();
+
+        		content[7*i+4][0] = "Screen";
+        		content[7*i+4][1] = currenttimetable.getScreen()+"";
+
+        		content[7*i+5][0] = "Seat";
+        		content[7*i+5][1] = convertSeat(seats.getRow(),seats.getCol(),currentrow[i],currentcol[i]);
+
+        		content[7*i+6][0] = "";
+        		content[7*i+6][1] = "";
+        		if(i == number-1) {
+        			content[7*i+6][0] = "Total";
+            		content[7*i+6][1] = "£"+fee*(100-currentticketinfo.getDiscount())/100.0 * number;	
+        		}
+        }
+		kioskpay.ticketModel = new DefaultTableModel(content,new String[]{"title","content"});
         kioskpay.ticket.setModel(kioskpay.ticketModel);
+        kioskpay.ticket.enable(false);
         kioskpay.ticket.repaint();
 		kioskpay.setLocationRelativeTo(null);
 		kioskpay.setVisible(true);
@@ -700,8 +808,52 @@ public class CinemaSystem {
 	public void gotoFinish() {
 		//TODO add generate ticket especially ticket number
 		kioskpay.setVisible(false);
+		try { 
+			newticket = new Ticket[number];
+			for(int i = 0; i<newticket.length; i++) {
+				newticket[i] = createTicket(currentticketinfo.getType(), currentticketinfo.isIDRequired(), currentfilm.getName(), 
+						currenttimetable.getShowtime(), currenttimetable.getScreen(), currentrow[i], currentcol[i]);				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String[][] content = new String[number*7][2];
+        for(int i = 0; i<number; i++) {
+        		content[7*i][0] = "Ticket No.";
+        		content[7*i][1] = newticket[i].getNumber()+"";
+        		
+        		content[7*i+1][0] = "Type";
+        		content[7*i+1][1] = convertType(newticket[i].getType());
+
+        		content[7*i+2][0] = "Film";
+        		content[7*i+2][1] = newticket[i].getFilm();
+
+        		content[7*i+3][0] = "Showtime";
+        		content[7*i+3][1] = newticket[i].getShowtime();
+
+        		content[7*i+4][0] = "Screen";
+        		content[7*i+4][1] = newticket[i].getScreen()+"";
+
+        		content[7*i+5][0] = "Seat";
+        		content[7*i+5][1] = convertSeat(seats.getRow(), seats.getCol(),newticket[i].getRow(),newticket[i].getCol());
+
+        		content[7*i+6][0] = "";
+        		content[7*i+6][1] = "";
+        		if(i == number-1) {
+        			content[7*i+6][0] = "Total";
+            		content[7*i+6][1] = "£"+fee*(100-currentticketinfo.getDiscount())/100.0 * number;	
+        		}
+        }
+        kioskfinish.ticketModel = new DefaultTableModel(content,new String[]{"Title","Content"});
+        kioskfinish.ticket.setModel(kioskfinish.ticketModel);
+        kioskfinish.ticket.repaint();
+		kioskfinish.setLocationRelativeTo(null);
+		kioskfinish.setVisible(true);
+	}
+	
+	public String convertType(int type) {
 		String tickettype = "";
-        switch(currentticketinfo.getType()) {
+		switch(type) {
         case 1:
         		tickettype = "Child";
 			break;
@@ -715,60 +867,67 @@ public class CinemaSystem {
 			tickettype = "Student";
 			break;
 		}
-        String[][] content = new String[][]{{"Ticket No.", currentticket.getNumber()+""},{"Type",tickettype}, 
-        		{"Film", currentfilm.getName()},{"Showtime", currenttimetable.getShowtime()}, 
-        		{"Screen", currenttimetable.getScreen()+""}, {"Seat",currentrow +":"+ currentcol}};
-        kioskfinish.ticketModel = new DefaultTableModel(content,new String[]{"title","content"});
-        kioskfinish.ticket.setModel(kioskfinish.ticketModel);
-        kioskfinish.ticket.repaint();
-		kioskfinish.setLocationRelativeTo(null);
-		kioskfinish.setVisible(true);
+		return tickettype;
 	}
-//	
-//	public static void main(String args[]) throws IOException {
-//		CinemaSystem cs = new CinemaSystem();
-//		try {
-//			cs.readData();
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		for(int i = 0; i<cs.ticketInfoList.size(); i++) {
-//			if(cs.ticketInfoList.get(i).getType() == 1)
-//				System.out.print("Child\t");	
-//			else if(cs.ticketInfoList.get(i).getType() == 2)
-//				System.out.print("Adult\t");	
-//			else if(cs.ticketInfoList.get(i).getType() == 3)
-//				System.out.print("Senior\t");	
-//			else if(cs.ticketInfoList.get(i).getType() == 4)
-//				System.out.print("Student\t");	
-//			System.out.print(cs.ticketInfoList.get(i).getDescription()+"\t");
-//			if(cs.ticketInfoList.get(i).isIDRequired() == false)
-//				System.out.print("None\t");
-//			else
-//				System.out.print("Student ID\t");
-//			if(cs.ticketInfoList.get(i).getDiscount() == 0)
-//				System.out.println("None");
-//			else
-//				System.out.println(cs.ticketInfoList.get(i).getDiscount()+"%");
-//		}
-//		
-//		for(int i = 0; i<cs.filmInfoList.size(); i++) {
-//			System.out.println(cs.filmInfoList.get(i).getName() + "\t" + cs.filmInfoList.get(i).getRuntime()+" min"); 
-////			File sourceimage = new File("basic/poster/" + cs.filmInfoList.get(i).getPoster());
-////			Image image = ImageIO.read(sourceimage);
-////			JFrame frame = new JFrame();
-////		    JLabel label = new JLabel(new ImageIcon(image));
-////		    frame.getContentPane().add(label, BorderLayout.CENTER);
-////		    frame.pack();
-////		    frame.setVisible(true); 
-////		    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		}
-//		System.out.println(cs.ticketList.size());
-//		for(int i = 0; i<cs.ticketList.size(); i++) {
-//			System.out.println(cs.ticketList.get(i));
-//		}
-//	}
+	
+	public String convertTime(String time) {
+		String showtime = new String();
+		showtime = time.substring(0,2) + ":" + time.substring(2);
+		return showtime;
+	}
+	
+	public int compareTime(int hourA, int minA, String timetable) {
+		int hourB = Integer.parseInt(timetable.substring(0,2));
+		int minB = Integer.parseInt(timetable.substring(2));
+		if(hourA < hourB) {
+			return -1;			
+		} else if(hourA == hourB){
+			if(minA < minB)
+				return -1;
+			else 
+				return 1;
+		} else {
+			return 1;
+		}
+	}	
+	
+	public String convertSeat(int totalrow, int totalcol, int row, int col) {
+		String seat = new String();
+		seat = (char)((totalrow-1-row) + 65) + "";
+		seat = seat + (col+1);
+		return seat;
+	}
+	
+	public int[] extractSeat(String seat) {
+		int row = seats.getRow() - 1 - (seat.charAt(0) - 65);
+		int col = Integer.parseInt(seat.substring(1))-1;
+		int[] res = new int[]{row, col};
+		return res;
+	}
+	
+	public void gotoAdmin() {
+		adminlogin.setVisible(false);
+		adminlogin.setLocationRelativeTo(null);
+		adminlogin.setVisible(true);
+	}
+	
+	public void gotoManage() {
+		adminlogin.setVisible(false);
+		adminmanage.setLocationRelativeTo(null);
+		adminmanage.setVisible(true);
+	}
+	
+	public void gotoTimetable() {
+		adminmanage.setVisible(true);
+		admintimetable.setLocationRelativeTo(null);
+		admintimetable.setVisible(true);
+	}
+	
+	public void gotoReport() {
+		adminmanage.setVisible(true);
+		adminreport.setLocationRelativeTo(null);
+		adminreport.setVisible(true);
+	}
 	
 	/**
 	* Auto-generated main method to display this JFrame
@@ -778,6 +937,7 @@ public class CinemaSystem {
 		// check gate
 		//cs.gotoGate();
 		// kiosk
-		cs.gotoWelcome();
+//		cs.gotoWelcome();
+		cs.gotoAdmin();
 	}
 }

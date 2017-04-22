@@ -11,6 +11,7 @@ import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.LayoutStyle;
 
@@ -29,6 +30,7 @@ import javax.swing.LayoutStyle;
 public class KioskFinish extends javax.swing.JFrame {
 
 	private CinemaSystem cs;
+	private JScrollPane jScrollPane1;
 	private JButton finish;
 	private JButton same;
 	private JLabel jLabel1;
@@ -48,9 +50,14 @@ public class KioskFinish extends javax.swing.JFrame {
 			getContentPane().setLayout(thisLayout);
 			this.setTitle("Kiosk - Get your ticket");
 			{
-				ticketModel = new DefaultTableModel();
-				ticket = new JTable();
-				ticket.setModel(ticketModel);
+				jScrollPane1 = new JScrollPane();
+				{
+					ticketModel = new DefaultTableModel();
+					ticket = new JTable();
+					jScrollPane1.setViewportView(ticket);
+					ticket.setModel(ticketModel);
+					ticket.setPreferredSize(new java.awt.Dimension(630, 223));
+				}
 			}
 			{
 				jLabel1 = new JLabel();
@@ -81,23 +88,23 @@ public class KioskFinish extends javax.swing.JFrame {
 			thisLayout.setVerticalGroup(thisLayout.createSequentialGroup()
 				.addContainerGap(31, 31)
 				.addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addGap(23)
-				.addComponent(ticket, GroupLayout.PREFERRED_SIZE, 162, GroupLayout.PREFERRED_SIZE)
-				.addGap(80)
+				.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+				.addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 226, GroupLayout.PREFERRED_SIZE)
+				.addGap(25)
 				.addGroup(thisLayout.createParallelGroup()
 				    .addGroup(thisLayout.createSequentialGroup()
-				        .addComponent(same, GroupLayout.PREFERRED_SIZE, 156, GroupLayout.PREFERRED_SIZE))
+				        .addComponent(finish, GroupLayout.PREFERRED_SIZE, 156, GroupLayout.PREFERRED_SIZE))
 				    .addGroup(thisLayout.createSequentialGroup()
-				        .addComponent(finish, GroupLayout.PREFERRED_SIZE, 156, GroupLayout.PREFERRED_SIZE)))
-				.addContainerGap(111, Short.MAX_VALUE));
+				        .addComponent(same, GroupLayout.PREFERRED_SIZE, 156, GroupLayout.PREFERRED_SIZE)))
+				.addContainerGap(113, Short.MAX_VALUE));
 			thisLayout.setHorizontalGroup(thisLayout.createSequentialGroup()
-				.addContainerGap(81, 81)
+				.addContainerGap(83, 83)
 				.addGroup(thisLayout.createParallelGroup()
 				    .addGroup(thisLayout.createSequentialGroup()
-				        .addComponent(ticket, GroupLayout.PREFERRED_SIZE, 633, GroupLayout.PREFERRED_SIZE)
+				        .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 633, GroupLayout.PREFERRED_SIZE)
 				        .addGap(0, 0, Short.MAX_VALUE))
 				    .addGroup(thisLayout.createSequentialGroup()
-				        .addGap(51)
+				        .addGap(49)
 				        .addGroup(thisLayout.createParallelGroup()
 				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
 				                .addComponent(same, GroupLayout.PREFERRED_SIZE, 166, GroupLayout.PREFERRED_SIZE)
@@ -108,8 +115,8 @@ public class KioskFinish extends javax.swing.JFrame {
 				                .addGap(96)
 				                .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 434, GroupLayout.PREFERRED_SIZE)
 				                .addGap(0, 12, Short.MAX_VALUE)))
-				        .addGap(40)))
-				.addContainerGap(86, 86));
+				        .addGap(42)))
+				.addContainerGap(84, 84));
 			pack();
 			this.setSize(800, 600);
 		} catch (Exception e) {

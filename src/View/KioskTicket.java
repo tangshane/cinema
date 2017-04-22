@@ -22,7 +22,8 @@ public class KioskTicket extends javax.swing.JFrame {
 
 	private CinemaSystem cs;
 	private JButton ok;
-	private JComboBox number;
+	public JComboBox number;
+	public ComboBoxModel numberModel;
 	private JLabel jLabel2;
 	public JComboBox type;
 	public ComboBoxModel typeModel;
@@ -60,7 +61,7 @@ public class KioskTicket extends javax.swing.JFrame {
 					public void actionPerformed(ActionEvent evt) {
 						//System.out.println("back.actionPerformed, event="+evt);
 						//TODO add your code for back.actionPerformed
-						cs.gotoSeat();
+						cs.gotoTime(cs.getCurrentFilm().getName());
 					}
 				});
 			}
@@ -71,7 +72,7 @@ public class KioskTicket extends javax.swing.JFrame {
 					public void actionPerformed(ActionEvent evt) {
 						//System.out.println("ok.actionPerformed, event="+evt);
 						//TODO add your code for ok.actionPerformed
-						cs.gotoPay();
+						cs.gotoSeat();
 					}
 				});
 			}
@@ -89,7 +90,7 @@ public class KioskTicket extends javax.swing.JFrame {
 				jLabel2.setText("Number:");
 			}
 			{
-				ComboBoxModel numberModel = new DefaultComboBoxModel(new String[] { "1" });
+				numberModel = new DefaultComboBoxModel(new String[] { "", "1", "2", "3", "4", "5"});
 				number = new JComboBox();
 				number.setModel(numberModel);
 			}
