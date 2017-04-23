@@ -41,11 +41,13 @@ public class KioskFilm extends javax.swing.JFrame {
 	private CinemaSystem cs;
 	private JButton ok;
 	private JLabel jLabel1;
-	private JSpinner filminfo;
-	private JTable info;
 	private JScrollPane jScrollPane1;
 	private JButton back;
-
+	public TableModel infoModel;
+	public JTable info;
+	public SpinnerListModel filminfoModel;
+	public JSpinner filminfo;
+	
 	public KioskFilm(CinemaSystem cs) {
 		super();
 		this.cs = cs;
@@ -70,13 +72,7 @@ public class KioskFilm extends javax.swing.JFrame {
 				});
 			}
 			{
-				cs.readData();
-				String[] content = new String[cs.filmInfoList.size()];
-				for(int i = 0; i<cs.filmInfoList.size(); i++) {
-					content[i] = cs.filmInfoList.get(i).getName();
-				}
-				SpinnerListModel filminfoModel = 
-						new SpinnerListModel(content);
+				filminfoModel = new SpinnerListModel();
 				filminfo = new JSpinner();
 				filminfo.setModel(filminfoModel);
 				filminfo.setEditor(new JSpinner.DefaultEditor(filminfo));
@@ -98,23 +94,8 @@ public class KioskFilm extends javax.swing.JFrame {
 			}
 			{
 				jScrollPane1 = new JScrollPane();
-				{
-					Vector<String> title = new Vector<String>();// 列名
-					title.add("Film"); title.add("Runtime"); title.add("Poster");
-					Vector<Vector<Object>> data = new Vector<Vector<Object>>();  
-					cs.readData();
-			        for (int i = 0; i < cs.filmInfoList.size(); i++) {  
-			            Vector<Object> v = new Vector<Object>();  
-			            Film f = cs.filmInfoList.get(i);  
-			            ImageIcon icon = new ImageIcon("basic/poster/" + f.getPoster());//图片处理  
-			            icon.setImage(icon.getImage().getScaledInstance(80,100,Image.SCALE_DEFAULT));  
-			            Image img = icon.getImage();  
-			            v.add(f.getName());  
-			            v.add(f.getRuntime() + " min");
-			            v.add(img);  
-			            data.add(v);  
-			        }  					
-					TableModel infoModel = new DefaultTableModel(data, title);  
+				{ 					
+					infoModel = new DefaultTableModel();  
 					info = new JTable(infoModel);
 					info.getTableHeader().setReorderingAllowed(false);   //不可整列移动     
 			        info.getTableHeader().setResizingAllowed(false);   
@@ -122,7 +103,6 @@ public class KioskFilm extends javax.swing.JFrame {
 					info.setModel(infoModel);
 					info.setRowHeight(100);
 					info.enable(false);
-					info.getColumnModel().getColumn(2).setCellRenderer(new ImageRenderer());
 				}
 			}
 			thisLayout.setVerticalGroup(thisLayout.createSequentialGroup()

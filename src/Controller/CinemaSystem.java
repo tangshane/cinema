@@ -1,15 +1,12 @@
 package Controller;
 
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 
 import Model.*;
 import View.*;
@@ -17,44 +14,42 @@ import View.*;
 public class CinemaSystem {
 	private static final int fee = 16;
 	// check gate frame
-	CheckGate checkgate;
-	CheckTicket checkticket;
+	private CheckGate checkgate;
+	private CheckTicket checkticket;
 	// kiosk frame
-	KioskWelcome kioskwelcome;
-	KioskFilm kioskfilm;
-	KioskTime kiosktime;
-	KioskTicket kioskticket;
-	KioskSeat kioskseat;
-	KioskPay kioskpay;
-	KioskFinish kioskfinish;
+	private KioskWelcome kioskwelcome;
+	private KioskFilm kioskfilm;
+	private KioskTime kiosktime;
+	private KioskTicket kioskticket;
+	private KioskSeat kioskseat;
+	private KioskPay kioskpay;
+	private KioskFinish kioskfinish;
 	// manage frame
-	AdminLogin adminlogin;
-	AdminManage adminmanage;
-	AdminTimetable admintimetable;
-	AdminReport adminreport;
+	private AdminLogin adminlogin;
+	private AdminManage adminmanage;
+	private AdminTimetable admintimetable;
+	private AdminReport adminreport;
 	
 	// kiosk info
-	Film currentfilm;
-	Timetable currenttimetable;
-	TicketInfo currentticketinfo;
-	int[] currentrow;
-	int[] currentcol;
-	int occupy;
-	int number;
-	Ticket[] newticket;
+	private Film currentfilm;
+	private Timetable currenttimetable;
+	private TicketInfo currentticketinfo;
+	private int[] currentrow;
+	private int[] currentcol;
+	private int occupy;
+	private int number;
+	private Ticket[] newticket;
 	
-	// basic
-	public ArrayList<Admin> adminList = new ArrayList<Admin>();
-	public ArrayList<Film> filmInfoList = new ArrayList<Film>();
-	public ArrayList<Screen> screenList = new ArrayList<Screen>();
-	public ArrayList<TicketInfo> ticketInfoList = new ArrayList<TicketInfo>();
-	public Ticket currentticket;
-	public Ticket briefCurrentTicket;
-	
-	// date
-	public ArrayList<Ticket> briefTicketList = new ArrayList<Ticket>();
-	public ArrayList<Timetable> timetableList = new ArrayList<Timetable>();
-	// report and ticketnumber.txt
+	// basic info
+	private ArrayList<Admin> adminList = new ArrayList<Admin>();
+	private ArrayList<Film> filmInfoList = new ArrayList<Film>();
+	private ArrayList<Screen> screenList = new ArrayList<Screen>();
+	private ArrayList<TicketInfo> ticketInfoList = new ArrayList<TicketInfo>();
+	private Ticket currentticket;
+	private Ticket briefCurrentTicket;
+	private ArrayList<Ticket> briefTicketList = new ArrayList<Ticket>();
+	private ArrayList<Timetable> timetableList = new ArrayList<Timetable>();
+	//TODO report and ticketnumber.txt
 	
 	Screen seats = null;
 	
@@ -502,7 +497,6 @@ public class CinemaSystem {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		//System.out.println(getCurrentDatePath()+"/"+ticketno+".txt:"+currentticket.toString());
 		try {
 			updateScreen(film, showtime, row, col);
 			writeData();
@@ -638,6 +632,65 @@ public class CinemaSystem {
         }     
     }    
 	
+	public String convertType(int type) {
+		String tickettype = "";
+		switch(type) {
+        case 1:
+        		tickettype = "Child";
+			break;
+		case 2:
+			tickettype = "Adult";
+			break;
+		case 3:
+			tickettype = "Senior";
+			break;
+		case 4:
+			tickettype = "Student";
+			break;
+		}
+		return tickettype;
+	}
+	
+	public String convertTime(String time) {
+		String showtime = new String();
+		showtime = time.substring(0,2) + ":" + time.substring(2);
+		return showtime;
+	}
+	
+	public String extractTime(String time) {
+		int index = time.indexOf(":");
+		return time.substring(0, index) + time.substring(index+1);
+	}
+	
+	public int compareTime(int hourA, int minA, String timetable) {
+		int hourB = Integer.parseInt(timetable.substring(0,2));
+		int minB = Integer.parseInt(timetable.substring(2));
+		if(hourA < hourB) {
+			return -1;			
+		} else if(hourA == hourB){
+			if(minA < minB)
+				return -1;
+			else 
+				return 1;
+		} else {
+			return 1;
+		}
+	}	
+	
+	public String convertSeat(int totalrow, int totalcol, int row, int col) {
+		String seat = new String();
+		seat = (char)((totalrow-1-row) + 65) + "";
+		seat = seat + (col+1);
+		return seat;
+	}
+	
+	public int[] extractSeat(String seat) {
+		int row = seats.getRow() - 1 - (seat.charAt(0) - 65);
+		int col = Integer.parseInt(seat.substring(1))-1;
+		int[] res = new int[]{row, col};
+		return res;
+	}
+	
 	public void gotoGate() {
 		checkticket.setVisible(false);
 		checkgate.setLocationRelativeTo(null);
@@ -690,6 +743,32 @@ public class CinemaSystem {
 	
 	public void gotoFilm() {
 		kioskwelcome.setVisible(false);
+		String[] content = new String[filmInfoList.size()];
+		for(int i = 0; i<filmInfoList.size(); i++) {
+			content[i] = filmInfoList.get(i).getName();
+		}
+		kioskfilm.filminfoModel = new SpinnerListModel(content);
+		kioskfilm.filminfo.setModel(kioskfilm.filminfoModel);
+		kioskfilm.filminfo.setEditor(new JSpinner.DefaultEditor(kioskfilm.filminfo));
+		kioskfilm.filminfo.repaint();
+		Vector<String> title = new Vector<String>();// 列名
+		title.add("Film"); title.add("Runtime"); title.add("Poster");
+		Vector<Vector<Object>> data = new Vector<Vector<Object>>();  
+		for (int i = 0; i < filmInfoList.size(); i++) {  
+            Vector<Object> v = new Vector<Object>();  
+            Film f = filmInfoList.get(i);  
+            ImageIcon icon = new ImageIcon("basic/poster/" + f.getPoster());//图片处理  
+            icon.setImage(icon.getImage().getScaledInstance(80,100,Image.SCALE_DEFAULT));  
+            Image img = icon.getImage();  
+            v.add(f.getName());  
+            v.add(f.getRuntime() + " min");
+            v.add(img);  
+            data.add(v);  
+        } 
+        kioskfilm.infoModel = new DefaultTableModel(data, title);  
+        kioskfilm.info.setModel(kioskfilm.infoModel);
+        kioskfilm.info.repaint();
+        kioskfilm.info.getColumnModel().getColumn(2).setCellRenderer(new ImageRenderer());
 		kioskfilm.setLocationRelativeTo(null);
 		kioskfilm.setVisible(true);
 	}
@@ -907,65 +986,6 @@ public class CinemaSystem {
 		kioskfinish.setVisible(true);
 	}
 	
-	public String convertType(int type) {
-		String tickettype = "";
-		switch(type) {
-        case 1:
-        		tickettype = "Child";
-			break;
-		case 2:
-			tickettype = "Adult";
-			break;
-		case 3:
-			tickettype = "Senior";
-			break;
-		case 4:
-			tickettype = "Student";
-			break;
-		}
-		return tickettype;
-	}
-	
-	public String convertTime(String time) {
-		String showtime = new String();
-		showtime = time.substring(0,2) + ":" + time.substring(2);
-		return showtime;
-	}
-	
-	public String extractTime(String time) {
-		int index = time.indexOf(":");
-		return time.substring(0, index) + time.substring(index+1);
-	}
-	
-	public int compareTime(int hourA, int minA, String timetable) {
-		int hourB = Integer.parseInt(timetable.substring(0,2));
-		int minB = Integer.parseInt(timetable.substring(2));
-		if(hourA < hourB) {
-			return -1;			
-		} else if(hourA == hourB){
-			if(minA < minB)
-				return -1;
-			else 
-				return 1;
-		} else {
-			return 1;
-		}
-	}	
-	
-	public String convertSeat(int totalrow, int totalcol, int row, int col) {
-		String seat = new String();
-		seat = (char)((totalrow-1-row) + 65) + "";
-		seat = seat + (col+1);
-		return seat;
-	}
-	
-	public int[] extractSeat(String seat) {
-		int row = seats.getRow() - 1 - (seat.charAt(0) - 65);
-		int col = Integer.parseInt(seat.substring(1))-1;
-		int[] res = new int[]{row, col};
-		return res;
-	}
-	
 	public void gotoAdmin() {
 		adminlogin.setVisible(false);
 		adminlogin.username.setText("");
@@ -1070,9 +1090,6 @@ public class CinemaSystem {
 		adminreport.setVisible(true);
 	}
 	
-	/**
-	* Auto-generated main method to display this JFrame
-	*/
 	public static void main(String args[]) {
 		CinemaSystem cs = new CinemaSystem();
 		try {
@@ -1084,6 +1101,6 @@ public class CinemaSystem {
 		//cs.gotoGate();
 		// kiosk
 		cs.gotoWelcome();
-		cs.gotoAdmin();
+		//cs.gotoAdmin();
 	}
 }
