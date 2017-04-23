@@ -295,19 +295,26 @@ public class CinemaSystem {
 	public boolean addTimetable(int screen, String filmName, String showtime) throws Exception {
 		for(int i = 0; i<timetableList.size(); i++) {
 			Timetable timetable = timetableList.get(i);
-			Film targetfilm = getFilm(timetable.getFilmName());
-			Film film = getFilm(filmName);
-			String starttime = showtime;
-			String endtime = showtime + film.getRuntime();
-			String targetstart = timetable.getShowtime();
-			String targetend = timetable.getShowtime() + targetfilm.getRuntime();
-			if(compareTime(targetstart, endtime) != -1 || compareTime(targetend, starttime) != 1)
-				continue;
-			else
-				return false;
+			if(screen == timetable.getScreen()) {
+				Film targetfilm = getFilm(timetable.getFilmName());
+				Film film = getFilm(filmName);
+				String starttime = showtime;
+				String endtime = addTime(showtime, film.getRuntime());
+				String targetstart = timetable.getShowtime();
+				String targetend = addTime(timetable.getShowtime(), targetfilm.getRuntime());
+				if(compareTime(targetstart, endtime) != -1 || compareTime(targetend, starttime) != 1)
+					continue;
+				else {
+					return false;
+				}				
+			}
 		}
 		Timetable timetable = new Timetable(screen, filmName, showtime);
 		timetableList.add(timetable);
+		createFile(getCurrentDatePath(), filmName, showtime);
+		BufferedWriter output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+filmName+"/"+showtime+".txt"));
+		output.write(createSeat(screen).toString());
+		output.close();
 		writeData();	
 		return true;
 	}
@@ -324,13 +331,14 @@ public class CinemaSystem {
 	}
 	
 	public boolean deleteTimetable(int screen, String filmName, String showtime) throws Exception {
-		readData();
 		int index = searchTimetable(screen, filmName, showtime);
 		if(index == -1) {
 			return false;
 		}
 		timetableList.remove(index);
 		writeData();	
+		deleteFile(getCurrentDatePath(), filmName, showtime);  
+		readData();
 		return true;
 	}
 	
@@ -444,6 +452,31 @@ public class CinemaSystem {
 		}
 	}
 	
+	public Screen createSeat(int screen) {
+		String[][] screenseat = null;
+		String[][] seat = null;
+		int row = 0;
+		int col = 0;
+		for(int i = 0; i<screenList.size(); i++) {
+			if(screenList.get(i).getNumber() == screen) {
+				screenseat = screenList.get(i).getSeat();
+				row = screenList.get(i).getRow();
+				col = screenList.get(i).getCol();
+				seat = new String[row][col];
+			}
+		}
+		for(int i = 0; i<screenseat.length; i++) {
+			for(int j = 0; j<screenseat[0].length; j++) {
+				if(screenseat[i][j].equals("NULL")) {
+					seat[i][j] = "NULL";
+				} else {
+					seat[i][j] = "0";
+				}
+			}
+		}
+		return new Screen(screen, row, col, seat);
+	}
+	
 	public Ticket searchTicket(int number) {
 		for(int i = 0; i<briefTicketList.size(); i++) {
 			if(briefTicketList.get(i).getNumber() == number)
@@ -467,7 +500,6 @@ public class CinemaSystem {
 			output.write(currentticket.toString());
 			output.close();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		//System.out.println(getCurrentDatePath()+"/"+ticketno+".txt:"+currentticket.toString());
@@ -554,13 +586,12 @@ public class CinemaSystem {
 		return path;
 	}
 	
-	public String addTime(String time, String delta) {
+	public String addTime(String time, int delta) {
 		int hour = Integer.parseInt(time.substring(0,2));
 		int min = Integer.parseInt(time.substring(2));
-		int deltaHour = Integer.parseInt(delta.substring(0,2));
-		int deltaMin = Integer.parseInt(delta.substring(2));
-		int newMin = (min + deltaMin) % 60;
-		int newHour = (hour + deltaHour) + (min + deltaMin) / 60;
+		int deltaMin = delta;
+		int newMin = (hour * 60 + min + deltaMin) % 60;
+		int newHour = (hour * 60 + min + deltaMin) / 60;
 		return new String(newHour + "" + newMin);
 	}
 	
@@ -578,6 +609,34 @@ public class CinemaSystem {
 		else
 			return 0;
 	}
+	
+	public void createFile(String date, String film, String file) {
+        String separator = File.separator;
+        String directory = date + separator + film;
+        String fileName = file + ".txt";
+        File f = new File(directory,fileName);
+        if(!f.exists()) {
+            f.getParentFile().mkdirs();
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+	
+	public boolean deleteFile(String date, String film, String file){     
+		String separator = File.separator;
+        String directory = date + separator + film;
+        String fileName = file + ".txt";
+        File f = new File(directory,fileName);
+        if(f.isFile() && f.exists()){     
+            f.delete();     
+            return true;     
+        }else{     
+            return false;     
+        }     
+    }    
 	
 	public void gotoGate() {
 		checkticket.setVisible(false);
@@ -663,7 +722,7 @@ public class CinemaSystem {
         kiosktime.timetable.repaint();
 //		((AbstractTableModel) kiosktime.timetableModel).fireTableDataChanged();
         kiosktime.timetable.getColumnModel().getColumn(2).setCellRenderer(new JButtonRenderer());
-        kiosktime.timetable.getColumnModel().getColumn(2).setCellEditor(new JButtonEditor(new JCheckBox(), this));       
+        kiosktime.timetable.getColumnModel().getColumn(2).setCellEditor(new JButtonEditor(new JCheckBox(), this, true));       
 	}
 	
 	public void gotoTicket() {
@@ -703,7 +762,6 @@ public class CinemaSystem {
         kioskticket.type.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				//System.out.println("type.actionPerformed, event="+evt);
-				//TODO add your code for type.actionPerformed
 				try {
 					int index = searchTicketInfo((int)kioskticket.type.getSelectedIndex());
 					setCurrentTicketInfo(ticketInfoList.get(index));
@@ -744,7 +802,6 @@ public class CinemaSystem {
 					seat.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent evt) {
 							//System.out.println("seat.actionPerformed, event="+evt);
-							//TODO add your code for back.actionPerformed
 							if(number!=occupy) {
 								currentrow[occupy] = extractSeat(seat.getText())[0];
 								currentcol[occupy] = extractSeat(seat.getText())[1]; 
@@ -806,7 +863,6 @@ public class CinemaSystem {
 	}
 	
 	public void gotoFinish() {
-		//TODO add generate ticket especially ticket number
 		kioskpay.setVisible(false);
 		try { 
 			newticket = new Ticket[number];
@@ -876,6 +932,11 @@ public class CinemaSystem {
 		return showtime;
 	}
 	
+	public String extractTime(String time) {
+		int index = time.indexOf(":");
+		return time.substring(0, index) + time.substring(index+1);
+	}
+	
 	public int compareTime(int hourA, int minA, String timetable) {
 		int hourB = Integer.parseInt(timetable.substring(0,2));
 		int minB = Integer.parseInt(timetable.substring(2));
@@ -907,18 +968,98 @@ public class CinemaSystem {
 	
 	public void gotoAdmin() {
 		adminlogin.setVisible(false);
+		adminlogin.username.setText("");
+		adminlogin.password.setText("");
 		adminlogin.setLocationRelativeTo(null);
 		adminlogin.setVisible(true);
 	}
 	
-	public void gotoManage() {
-		adminlogin.setVisible(false);
+	public void gotoManage(int choose) {
+		if(choose == 1) {
+			int valid = -1;
+			try {
+				valid = searchAdmin(adminlogin.username.getText(), adminlogin.password.getText());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(valid == -1) {
+				JOptionPane.showMessageDialog(null, "Username or password!", "Alert", JOptionPane.ERROR_MESSAGE); 			
+				return ;
+			}
+			adminlogin.setVisible(false);			
+		} else if(choose == 2){
+			if(admintimetable.screen.getSelectedIndex()!=0 && admintimetable.film.getSelectedIndex()!=0 &&
+					admintimetable.hour.getSelectedIndex()!=0 && admintimetable.min.getSelectedIndex()!=0) {
+				boolean status = false;
+				try {
+					status = addTimetable(Integer.parseInt(admintimetable.screen.getSelectedItem().toString()), admintimetable.film.getSelectedItem().toString(), 
+							admintimetable.hour.getSelectedItem().toString()+admintimetable.min.getSelectedItem().toString());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if(status) {
+					JOptionPane.showMessageDialog(null, "Added successfully!", "Info", JOptionPane.INFORMATION_MESSAGE); 			
+				} else {
+					JOptionPane.showMessageDialog(null, "Add failed!", "Alert", JOptionPane.ERROR_MESSAGE); 		
+				}
+			}			
+		}
 		adminmanage.setLocationRelativeTo(null);
 		adminmanage.setVisible(true);
 	}
 	
 	public void gotoTimetable() {
 		adminmanage.setVisible(true);
+		String[] screenContent = new String[screenList.size()+1];
+		screenContent[0] = "";
+		for(int i = 1; i<screenList.size()+1; i++) {
+			screenContent[i] = screenList.get(i-1).getNumber()+"";
+		}
+		admintimetable.screenModel = new DefaultComboBoxModel(screenContent);
+		admintimetable.screen.setModel(admintimetable.screenModel);
+		admintimetable.screen.repaint();
+		String[] filmContent = new String[filmInfoList.size()+1];
+		filmContent[0] = "";
+		for(int i = 1; i<filmInfoList.size()+1; i++) {
+			filmContent[i] = filmInfoList.get(i-1).getName();
+		}
+		admintimetable.filmModel = new DefaultComboBoxModel(filmContent);
+		admintimetable.film.setModel(admintimetable.filmModel);
+		admintimetable.film.repaint();
+		String[] hourContent = new String[25];
+		hourContent[0] = "";
+		for(int i = 1; i<25; i++) {
+			hourContent[i] = String.format("%02d", i-1);
+		}
+		admintimetable.hourModel = new DefaultComboBoxModel(hourContent);
+		admintimetable.hour.setModel(admintimetable.hourModel);
+		admintimetable.hour.repaint();
+		String[] minContent = new String[61];
+		minContent[0] = "";
+		for(int i = 1; i<61; i++) {
+			minContent[i] = String.format("%02d", i-1);
+		}
+		admintimetable.minModel = new DefaultComboBoxModel(minContent);
+		admintimetable.min.setModel(admintimetable.minModel);
+		admintimetable.min.repaint();
+		//TODO update table content
+		Vector<String> title = new Vector<String>();// 列名
+		title.add("Screen"); title.add("Film"); title.add("Showtime"); title.add("Confirm");
+		Vector<Vector<Object>> data = new Vector<Vector<Object>>();  
+		for (int i = 0; i < getTimetable(false).size(); i++) {  
+            Vector<Object> v = new Vector<Object>();  
+            Timetable t = getTimetable(false).get(i); 
+            v.add(t.getScreen());
+            v.add(t.getFilmName());
+	        v.add(convertTime(t.getShowtime()));
+	        v.add("Delete");
+	        data.add(v);  			            	
+        }
+        admintimetable.timetableModel = new DefaultTableModel(data, title);
+        admintimetable.timetable.setModel(admintimetable.timetableModel);
+        admintimetable.timetable.repaint();
+        admintimetable.timetable.getColumnModel().getColumn(3).setCellRenderer(new JButtonRenderer());
+        admintimetable.timetable.getColumnModel().getColumn(3).setCellEditor(new JButtonEditor(new JCheckBox(), this, false));       
 		admintimetable.setLocationRelativeTo(null);
 		admintimetable.setVisible(true);
 	}
@@ -934,10 +1075,15 @@ public class CinemaSystem {
 	*/
 	public static void main(String args[]) {
 		CinemaSystem cs = new CinemaSystem();
+		try {
+			cs.readData();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		// check gate
 		//cs.gotoGate();
 		// kiosk
-//		cs.gotoWelcome();
+		cs.gotoWelcome();
 		cs.gotoAdmin();
 	}
 }

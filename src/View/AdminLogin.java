@@ -22,8 +22,8 @@ public class AdminLogin extends javax.swing.JFrame {
 	private JLabel jLabel2;
 	private JLabel jLabel3;
 	private JButton login;
-	private JPasswordField password;
-	private JTextField username;
+	public JPasswordField password;
+	public JTextField username;
 	private CinemaSystem cs;
 	
 	public AdminLogin(CinemaSystem cs) {
@@ -63,7 +63,7 @@ public class AdminLogin extends javax.swing.JFrame {
 					public void actionPerformed(ActionEvent evt) {
 						//System.out.println("login.actionPerformed, event="+evt);
 						//TODO add your code for login.actionPerformed
-						cs.gotoManage();
+						cs.gotoManage(1);
 					}
 				});
 			}

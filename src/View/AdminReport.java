@@ -38,7 +38,7 @@ public class AdminReport extends javax.swing.JFrame {
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
 			GroupLayout thisLayout = new GroupLayout((JComponent)getContentPane());
 			getContentPane().setLayout(thisLayout);
-			this.setTitle("Admin - Login");
+			this.setTitle("Admin - Report");
 			{
 				jLabel1 = new JLabel("", SwingConstants.CENTER);
 				jLabel1.setText("Welcome Admin, please manage system!");

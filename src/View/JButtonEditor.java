@@ -16,9 +16,11 @@ public class JButtonEditor extends DefaultCellEditor {
     private JTable table;
     private int row;
     private CinemaSystem cs;
+    private boolean confirm;
 
-    public JButtonEditor(JCheckBox checkBox, CinemaSystem cs) {
+    public JButtonEditor(JCheckBox checkBox, CinemaSystem cs, boolean confirm) {
         super(checkBox);
+        this.confirm = confirm;
         button = new JButton();
         button.setOpaque(true);
         button.addActionListener(new ActionListener() {
@@ -51,10 +53,22 @@ public class JButtonEditor extends DefaultCellEditor {
     public Object getCellEditorValue() {
         if (isPushed) {
         		int screen = (int)table.getValueAt(row, 0);
-        		String showtime = ((String) table.getValueAt(row, 1)).substring(0,2) + ((String) table.getValueAt(row, 1)).substring(3);
-            JOptionPane.showMessageDialog(button, label + ": Screen " +screen+ " " + showtime + " selected!");
-            cs.setCurrentTimetable(new Timetable(screen, cs.getCurrentFilm().getName(), showtime));
-            cs.gotoTicket();
+            if(confirm) {
+            		String showtime = cs.extractTime(table.getValueAt(row, 1).toString());
+    				JOptionPane.showMessageDialog(button, label + ": Screen " +screen+ " on " + cs.convertTime(showtime) + "!");
+                cs.setCurrentTimetable(new Timetable(screen, cs.getCurrentFilm().getName(), showtime));
+                cs.gotoTicket();
+            } else {
+        			String showtime = cs.extractTime(table.getValueAt(row, 2).toString());
+        			String filmName = table.getValueAt(row, 1).toString();
+           		JOptionPane.showMessageDialog(button, label + ": Screen " +screen+ " Film:" + filmName + " on " + cs.convertTime(showtime) + "!");
+           		try {
+           			cs.deleteTimetable(screen, filmName, showtime);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+           		cs.gotoManage(3);
+            }
         }
         isPushed = false;
         return label;

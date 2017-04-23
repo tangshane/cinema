@@ -38,7 +38,7 @@ public class AdminManage extends javax.swing.JFrame {
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
 			GroupLayout thisLayout = new GroupLayout((JComponent)getContentPane());
 			getContentPane().setLayout(thisLayout);
-			this.setTitle("Admin - Login");
+			this.setTitle("Admin - Management");
 			{
 				jLabel1 = new JLabel("", SwingConstants.CENTER);
 				jLabel1.setText("Welcome Admin, please manage system!");
@@ -97,7 +97,7 @@ public class AdminManage extends javax.swing.JFrame {
 				.addGap(32)
 				.addComponent(more, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addGap(29)
-				.addComponent(logout, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addComponent(logout, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 				.addContainerGap(25, Short.MAX_VALUE));
 			thisLayout.setHorizontalGroup(thisLayout.createSequentialGroup()
 				.addContainerGap(40, 40)
@@ -109,17 +109,17 @@ public class AdminManage extends javax.swing.JFrame {
 				        .addGap(26)
 				        .addGroup(thisLayout.createParallelGroup()
 				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addComponent(report, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)
+				                .addComponent(timetable, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)
 				                .addGap(0, 21, Short.MAX_VALUE))
 				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addComponent(timetable, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)
+				                .addComponent(report, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)
 				                .addGap(0, 21, Short.MAX_VALUE))
 				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
 				                .addComponent(more, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)
 				                .addGap(0, 21, Short.MAX_VALUE))
 				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addGap(247)
-				                .addComponent(logout, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
+				                .addGap(217)
+				                .addComponent(logout, GroupLayout.PREFERRED_SIZE, 92, GroupLayout.PREFERRED_SIZE)
 				                .addGap(0, 0, Short.MAX_VALUE)))))
 				.addContainerGap(25, 25));
 			pack();
