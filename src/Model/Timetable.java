@@ -1,5 +1,10 @@
 package Model;
 
+/**
+ * Timetable Model
+ * @author Yuqin Cui
+ * @version v1.0
+ */
 public class Timetable {
 	private int screen;
 	private String filmName;

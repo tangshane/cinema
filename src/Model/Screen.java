@@ -1,5 +1,10 @@
 package Model;
 
+/**
+ * Screen Model
+ * @author Yuqian Li
+ * @version v1.0
+ */
 public class Screen {
 	private int number;
 	private int row;

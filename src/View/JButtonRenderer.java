@@ -4,6 +4,11 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
 
+/**
+ * Timetable confirm button and delete button
+ * @author Zhenhao Li
+ * @version v1.0
+ */
 public class JButtonRenderer extends JButton implements TableCellRenderer {
 
     public JButtonRenderer() {

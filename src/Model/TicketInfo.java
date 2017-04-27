@@ -1,5 +1,10 @@
 package Model;
 
+/**
+ * TicketInfo Model
+ * @author Yuqian Li
+ * @version v1.0
+ */
 public class TicketInfo {
 	private int type; // 1-Child, 2-Adult, 3-Senior, 4-Student
 	private String description;

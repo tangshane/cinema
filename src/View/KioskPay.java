@@ -1,23 +1,10 @@
 package View;
 
-import javax.swing.WindowConstants;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.SwingUtilities;
+import java.awt.event.*;
+import javax.swing.table.*;
 import Controller.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.GroupLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.LayoutStyle;
+import javax.swing.*;
+
 
 /**
 * This code was edited or generated using CloudGarden's Jigloo
@@ -31,6 +18,11 @@ import javax.swing.LayoutStyle;
 * THIS MACHINE, SO JIGLOO OR THIS CODE CANNOT BE USED
 * LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
 */
+/**
+ * Kiosk pay order frame
+ * @author Zhekong Yang
+ * @version v1.0
+ */
 public class KioskPay extends javax.swing.JFrame {
 
 	private CinemaSystem cs;
@@ -126,7 +118,7 @@ public class KioskPay extends javax.swing.JFrame {
 					public void actionPerformed(ActionEvent evt) {
 						//System.out.println("back.actionPerformed, event="+evt);
 						//TODO add your code for back.actionPerformed
-						cs.gotoTicket();
+						cs.gotoSeat();
 					}
 				});
 			}
@@ -137,7 +129,7 @@ public class KioskPay extends javax.swing.JFrame {
 					ticket = new JTable();
 					jScrollPane1.setViewportView(ticket);
 					ticket.setModel(ticketModel);
-					ticket.setPreferredSize(new java.awt.Dimension(661, 258));
+					ticket.setPreferredSize(new java.awt.Dimension(646, 1168));
 				}
 			}
 			thisLayout.setHorizontalGroup(thisLayout.createSequentialGroup()

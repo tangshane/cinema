@@ -1,5 +1,10 @@
 package Model;
 
+/**
+ * Film Model
+ * @author Zhenhao Li
+ * @version v1.0
+ */
 public class Film {
 	private String name;
 	private int runtime;

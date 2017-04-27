@@ -3,6 +3,7 @@ package Controller;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.text.*;
 import java.util.*;
 
 import javax.swing.*;
@@ -11,8 +12,19 @@ import javax.swing.table.*;
 import Model.*;
 import View.*;
 
+
+/**
+ * Control switching frame and read or write data
+ * @author Yunyao Liu
+ * @author Zhenhao Li
+ * @author Yuqian Li
+ * @author Zhekong Yang
+ * @author Zheng Dong
+ * @author Yuqin Cui
+ * @version v1.0
+ */
 public class CinemaSystem {
-	private static final int fee = 16;
+	private static final int FEE = 16;
 	// check gate frame
 	private CheckGate checkgate;
 	private CheckTicket checkticket;
@@ -48,11 +60,15 @@ public class CinemaSystem {
 	private Ticket currentticket;
 	private Ticket briefCurrentTicket;
 	private ArrayList<Ticket> briefTicketList = new ArrayList<Ticket>();
+	private ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
 	private ArrayList<Timetable> timetableList = new ArrayList<Timetable>();
-	//TODO report and ticketnumber.txt
+	public StringBuilder reportContent = new StringBuilder();
 	
 	Screen seats = null;
 	
+	/*
+	 * constructor
+	 */
 	public CinemaSystem() {
 		currentticket = new Ticket();
 		checkgate = new CheckGate(this);
@@ -96,7 +112,18 @@ public class CinemaSystem {
 		this.number = number;
 	}
 	
-	public void readData() throws Exception {
+	/**
+	 * Read data from Basic folder and current/previous date folder as several array list
+	 * @param current whether read data from current date folder or not
+	 * @throws Exception 
+	 */
+	public void readData(boolean current) throws Exception {
+		String datePath = "";
+		if(current) {
+			datePath = getCurrentDatePath();
+		} else {
+			datePath = getPreviousDatePath();
+		}
 		adminList.clear();
 		Scanner reader = new Scanner(new File("basic/Admin.txt"));
 		while (reader.hasNext()) {
@@ -142,27 +169,41 @@ public class CinemaSystem {
 			ticketInfoList.add(new TicketInfo(Integer.parseInt(s[0]), s[1], Boolean.parseBoolean(s[2]), Integer.parseInt(s[3])));
 		}
 		briefTicketList.clear();
-		reader = new Scanner(new File(getCurrentDatePath()+"/Ticket.txt"));
+		reader = new Scanner(new File(datePath+"/Ticket.txt"));
 		while (reader.hasNext()) {
 			String[] s = reader.nextLine().split("]]]]");
 			briefTicketList.add(new Ticket(Integer.parseInt(s[0]), Boolean.parseBoolean(s[1])));
 		}
 		timetableList.clear();
-		reader = new Scanner(new File(getCurrentDatePath()+"/Timetable.txt"));
+		reader = new Scanner(new File(datePath+"/Timetable.txt"));
 		while (reader.hasNext()) {
 			String[] s = reader.nextLine().split("]]]]");
 			timetableList.add(new Timetable(Integer.parseInt(s[0]), s[1], s[2]));
 		}
 		reader.close();
 	}
-
+	
+	/**
+	 * add admin account
+	 * @param id administrator username
+	 * @param password administrator password
+	 * @return whether add account successfully or not
+	 * @throws Exception
+	 */
 	public boolean addAccount(String id, String password) throws Exception {
 		Admin admin = new Admin(id, password);
 		adminList.add(admin);
-		writeData();	
+		writeData(true);	
 		return true;
 	}
 
+	/**
+	 * search admin as a login method for administrator
+	 * @param id administrator username
+	 * @param password administrator password
+	 * @return the position the administrator in array list
+	 * @throws Exception
+	 */
 	public int searchAdmin(String id, String password) throws Exception{
 		for(int i = 0; i<adminList.size();i++){
 			if(adminList.get(i).getID().equals(id) && adminList.get(i).getPassword().equals(password)){
@@ -172,16 +213,30 @@ public class CinemaSystem {
 		return -1;
 	}
 	
+	/**
+	 * delete an administrator account from system
+	 * @param id administrator username
+	 * @param password administrator password
+	 * @return whether administrator account deleted successfully
+	 * @throws Exception
+	 */
 	public boolean deleteAccount(String id, String password) throws Exception {
 		int index = searchAdmin(id, password);
 		if(index == -1) {
 			return false;
 		}
 		adminList.remove(index);
-		writeData();	
+		writeData(true);	
 		return true;
 	}
 	
+	/**
+	 * This method is to update username or password of administrator account
+	 * @param id administrator username
+	 * @param password administrator password
+	 * @return whether administrator account udpated successfully
+	 * @throws Exception
+	 */
 	public boolean updateAdmin(String id, String password) throws Exception {
 		int index = searchAdmin(id, password);
 		if(index == -1) {
@@ -191,13 +246,27 @@ public class CinemaSystem {
 		return true;
 	}
 	
+	/**
+	 * add a new film to film list
+	 * @param name film name
+	 * @param runtime film runtime record in minutes
+	 * @param poster film poster filename in *.jpg
+	 * @return whether add new film successfully
+	 * @throws Exception
+	 */
 	public boolean addFilm(String name, int runtime, String poster) throws Exception {
 		Film film = new Film(name, runtime, poster);
 		filmInfoList.add(film);
-		writeData();	
+		writeData(true);	
 		return true;
 	}
 
+	/**
+	 * search a film according to film name
+	 * @param name film name
+	 * @return the position in film list
+	 * @throws Exception
+	 */
 	public int searchFilm(String name) throws Exception{
 		for(int i = 0; i<filmInfoList.size();i++){
 			if(filmInfoList.get(i).getName().equals(name)){
@@ -207,6 +276,12 @@ public class CinemaSystem {
 		return -1;
 	}
 	
+	/**
+	 * get brief information according to film name
+	 * @param name film name
+	 * @return the brief information of specific film
+	 * @throws Exception
+	 */
 	public Film getFilm(String name) throws Exception{
 		for(int i = 0; i<filmInfoList.size();i++){
 			if(filmInfoList.get(i).getName().equals(name)){
@@ -216,16 +291,30 @@ public class CinemaSystem {
 		return null;
 	}
 	
+	/**
+	 * delete film according film name
+	 * @param name film name
+	 * @return whether delete film successfully
+	 * @throws Exception
+	 */
 	public boolean deleteFilm(String name) throws Exception {
 		int index = searchFilm(name);
 		if(index == -1) {
 			return false;
 		}
 		filmInfoList.remove(index);
-		writeData();	
+		writeData(true);	
 		return true;
 	}
 	
+	/**
+	 * update film name or runtime or poster
+	 * @param name film name
+	 * @param runtime film runtime
+	 * @param poster film poster file name
+	 * @return whether update information of film successfully
+	 * @throws Exception
+	 */
 	public boolean updateFilm(String name, int runtime, String poster) throws Exception {
 		int index = searchFilm(name);
 		if(index == -1) {
@@ -235,13 +324,28 @@ public class CinemaSystem {
 		return true;
 	}
 
+	/**
+	 * add a new type ticket 
+	 * @param type ticket type id
+	 * @param description ticket brief description
+	 * @param IDRequired when in the check gate, ID required check sometimes
+	 * @param discount special discount of some type ticket
+	 * @return add a new ticket successfully
+	 * @throws Exception
+	 */
 	public boolean addTicketInfo(int type, String description, boolean IDRequired, int discount) throws Exception {
 		TicketInfo ticket = new TicketInfo(type, description, IDRequired, discount);
 		ticketInfoList.add(ticket);
-		writeData();	
+		writeData(true);	
 		return true;
 	}
 
+	/**
+	 * search a type ticket according to its type id
+	 * @param type type id
+	 * @return the position in ticket list
+	 * @throws Exception
+	 */
 	public int searchTicketInfo(int type) throws Exception{
 		for(int i = 0; i<ticketInfoList.size();i++){
 			if(ticketInfoList.get(i).getType() == type){
@@ -251,16 +355,31 @@ public class CinemaSystem {
 		return -1;
 	}
 	
+	/**
+	 * delete a type of ticket from document
+	 * @param type type id
+	 * @return whether ticket deleted successfully
+	 * @throws Exception
+	 */
 	public boolean deleteTicketInfo(int type) throws Exception {
 		int index = searchTicketInfo(type);
 		if(index == -1) {
 			return false;
 		}
 		ticketInfoList.remove(index);
-		writeData();	
+		writeData(true);	
 		return true;
 	}
 	
+	/**
+	 * update specific ticket information
+	 * @param type type id
+	 * @param description brief information of ticket
+	 * @param IDRequired when in the check gate, ID required check sometimes
+	 * @param discount special discount of some type of tickets
+	 * @return whether update ticket information successfully
+	 * @throws Exception
+	 */
 	public boolean updateTicketInfo(int type, String description, boolean IDRequired, int discount) throws Exception {
 		int index = searchTicketInfo(type);
 		if(index == -1) {
@@ -270,6 +389,11 @@ public class CinemaSystem {
 		return true;
 	}
 	
+	/**
+	 * get today timetable from document
+	 * @param filter whether filter some timetable before current time, or read the whole timetable
+	 * @return a array list of timetable
+	 */
 	public ArrayList<Timetable> getTimetable(boolean filter) {
 		if(filter == true) {
 			ArrayList<Timetable> timetable = new ArrayList<Timetable>();
@@ -287,6 +411,14 @@ public class CinemaSystem {
 		return timetableList;	
 	}
 	
+	/**
+	 * add a new timetable. It will fail when two time slots overlapped.
+	 * @param screen screen id
+	 * @param filmName film name
+	 * @param showtime show time
+	 * @return whether the new timetable can be added successfully
+	 * @throws Exception
+	 */
 	public boolean addTimetable(int screen, String filmName, String showtime) throws Exception {
 		for(int i = 0; i<timetableList.size(); i++) {
 			Timetable timetable = timetableList.get(i);
@@ -297,6 +429,12 @@ public class CinemaSystem {
 				String endtime = addTime(showtime, film.getRuntime());
 				String targetstart = timetable.getShowtime();
 				String targetend = addTime(timetable.getShowtime(), targetfilm.getRuntime());
+//				System.out.println("Want Add Time: " + starttime + " to " + endtime);
+//				System.out.println("Current  Time: " + targetstart + " to " + targetend);
+//				if(compareTime(endtime, targetstart) ==1)
+//					System.out.println("Endtime too late. Overlap");
+//				if(compareTime(starttime, targetend) ==-1)
+//					System.out.println("Starttime too early. Overlap");
 				if(compareTime(targetstart, endtime) != -1 || compareTime(targetend, starttime) != 1)
 					continue;
 				else {
@@ -306,16 +444,24 @@ public class CinemaSystem {
 		}
 		Timetable timetable = new Timetable(screen, filmName, showtime);
 		timetableList.add(timetable);
-		createFile(getCurrentDatePath(), filmName, showtime);
-		BufferedWriter output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+filmName+"/"+showtime+".txt"));
+		createFile(getCurrentDatePath(), filmName, screen+" "+showtime);
+		BufferedWriter output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+filmName+"/"+screen+" "+showtime+".txt"));
 		output.write(createSeat(screen).toString());
 		output.close();
-		writeData();	
+		writeData(true);	
 		return true;
 	}
 
+	/**
+	 * search a specific timetable according to screen id, film name and show time
+	 * @param screen screen id
+	 * @param filmName film name
+	 * @param showtime show time
+	 * @return the position of that timetable 
+	 * @throws Exception
+	 */
 	public int searchTimetable(int screen, String filmName, String showtime) throws Exception{
-		readData();
+		readData(true);
 		for(int i = 0; i<timetableList.size();i++){
 			Timetable timetable = timetableList.get(i);
 			if(timetable.getScreen() == screen && timetable.getFilmName().equals(filmName) && timetable.getShowtime().equals(showtime)){
@@ -325,20 +471,36 @@ public class CinemaSystem {
 		return -1;
 	}
 	
+	/**
+	 * delete timetable according screen id, film name and show time
+	 * @param screen screen id
+	 * @param filmName film name
+	 * @param showtime show time
+	 * @return whether that timetable deleted successfully
+	 * @throws Exception
+	 */
 	public boolean deleteTimetable(int screen, String filmName, String showtime) throws Exception {
 		int index = searchTimetable(screen, filmName, showtime);
 		if(index == -1) {
 			return false;
 		}
 		timetableList.remove(index);
-		writeData();	
+		writeData(true);	
 		deleteFile(getCurrentDatePath(), filmName, showtime);  
-		readData();
+		readData(true);
 		return true;
 	}
 	
+	/**
+	 * update timetable details
+	 * @param screen screen id
+	 * @param filmName film name
+	 * @param showtime show time
+	 * @return whether timetable details updated successfully
+	 * @throws Exception
+	 */
 	public boolean updateTimetable(int screen, String filmName, String showtime) throws Exception {
-		readData();
+		readData(true);
 		int index = searchTimetable(screen, filmName, showtime);
 		if(index == -1) {
 			return false;
@@ -347,8 +509,15 @@ public class CinemaSystem {
 		return true;
 	}
 	
-	public boolean searchScreen(String filmname, String showtime) throws FileNotFoundException {
-		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+filmname+"/"+showtime+".txt"));
+	/**
+	 * search screen according to film name and show time
+	 * @param filmname film name
+	 * @param showtime show time
+	 * @return whether screen existed
+	 * @throws FileNotFoundException
+	 */
+	public boolean searchScreen(String filmname, int screen, String showtime) throws FileNotFoundException {
+		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+filmname+"/"+screen+" "+showtime+".txt"));
 		int line = 0;
 		int row = 0;
 		int col = 0;
@@ -379,8 +548,15 @@ public class CinemaSystem {
 			return true;
 	}
 	
-	public int availableScreen(String filmname, String showtime) throws FileNotFoundException {
-		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+filmname+"/"+showtime+".txt"));
+	/**
+	 * get the number of empty seats from specific timetable
+	 * @param filmname film name
+	 * @param showtime show time
+	 * @return the number of empty seats
+	 * @throws FileNotFoundException
+	 */
+	public int availableScreen(String filmname, int screen, String showtime) throws FileNotFoundException {
+		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+filmname+"/"+screen+" "+showtime+".txt"));
 		int line = 0;
 		int row = 0;
 		int col = 0;
@@ -407,8 +583,17 @@ public class CinemaSystem {
 		return empty;
 	}
 	
-	public boolean updateScreen(String filmname, String showtime, int seatrow, int seatcol) throws IOException {
-		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+filmname+"/"+showtime+".txt"));
+	/**
+	 * select specific seat from screen according to filmname, showtime, seatrow, seatcol
+	 * @param filmname film name
+	 * @param showtime show time
+	 * @param seatrow row number of seat
+	 * @param seatcol column number of seat
+	 * @return whether seat selected successfully
+	 * @throws IOException
+	 */
+	public boolean updateScreen(String filmname, int screen, String showtime, int seatrow, int seatcol) throws IOException {
+		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+filmname+"/"+screen+" "+showtime+".txt"));
 		int line = 0;
 		int row = 0;
 		int col = 0;
@@ -440,13 +625,18 @@ public class CinemaSystem {
 		if(seats == null)
 			return false;
 		else {
-			BufferedWriter output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+filmname+"/"+showtime+".txt"));
+			BufferedWriter output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+filmname+"/"+screen+" "+showtime+".txt"));
 			output.write(seats.toString());
 			output.close();
 			return true;
 		}
 	}
 	
+	/**
+	 * create an empty seat table of specific screen
+	 * @param screen screen id
+	 * @return an empty seat table
+	 */
 	public Screen createSeat(int screen) {
 		String[][] screenseat = null;
 		String[][] seat = null;
@@ -472,6 +662,11 @@ public class CinemaSystem {
 		return new Screen(screen, row, col, seat);
 	}
 	
+	/**
+	 * search ticket according to ticket number
+	 * @param number ticket number
+	 * @return a brief information of ticket
+	 */
 	public Ticket searchTicket(int number) {
 		for(int i = 0; i<briefTicketList.size(); i++) {
 			if(briefTicketList.get(i).getNumber() == number)
@@ -480,6 +675,17 @@ public class CinemaSystem {
 		return null;
 	}
 	
+	/**
+	 * create a new ticket 
+	 * @param type ticket type
+	 * @param IDRequired ticket ID required
+	 * @param film film name
+	 * @param showtime showtime
+	 * @param screen screen id
+	 * @param row row number of seat
+	 * @param col column number of seat
+	 * @return a new brief ticket 
+	 */
 	public Ticket createTicket(int type, boolean IDRequired, String film, String showtime, int screen, int row, int col){
 		Ticket ticket = new Ticket();
 		int ticketno = ticket.generateTicketNumber();
@@ -498,22 +704,41 @@ public class CinemaSystem {
 			e1.printStackTrace();
 		}
 		try {
-			updateScreen(film, showtime, row, col);
-			writeData();
+			updateScreen(film, screen, showtime, row, col);
+			writeData(true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return currentticket;
 	}
 	
-	public void getTicket(String number) throws FileNotFoundException {
-		Scanner reader = new Scanner(new File(getCurrentDatePath()+"/"+number+".txt"));
+	/**
+	 * get today's specific ticket or yesterday's specific ticket 
+	 * @param number ticket number
+	 * @param current read from current document folder or previous document folder
+	 * @throws FileNotFoundException
+	 */
+	public void getTicket(String number, boolean current) throws FileNotFoundException {
+		String datePath = "";
+		if(current) {
+			datePath = getCurrentDatePath();
+		} else {
+			datePath = getPreviousDatePath();
+		}
+		Scanner reader = new Scanner(new File(datePath+"/"+number+".txt"));
 		String[] s = reader.nextLine().split("]]]]");
 		currentticket = new Ticket(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Boolean.parseBoolean(s[2]), 
 								s[3], s[4], Integer.parseInt(s[5]), Integer.parseInt(s[6]), Integer.parseInt(s[7]), true);
 		reader.close();
 	}
 	
+	/**
+	 * use a ticket at check gate
+	 * @param no ticket number
+	 * @param IDRequire ID required check at check gate
+	 * @return whether ticket used successfully 
+	 * @throws IOException
+	 */
 	public boolean useTicket(String no, boolean IDRequire) throws IOException {
 		if(IDRequire == false) {
 			JOptionPane.showMessageDialog(null, "Please check ID!", "Alert", JOptionPane.ERROR_MESSAGE); 			
@@ -535,13 +760,24 @@ public class CinemaSystem {
 		BufferedWriter output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/"+number+".txt"));
 		output.write(currentticket.toString() + "\r\n");
 		output.close();
-		writeData();
+		writeData(true);
 		JOptionPane.showMessageDialog(null, "Door open, enjoy your film!", "Alert", JOptionPane.INFORMATION_MESSAGE); 			
 		gotoGate();
 		return true;
 	}
 	
-	public void writeData() throws IOException {
+	/**
+	 * write data into document
+	 * @param current write to current document folder or previous document folder
+	 * @throws IOException
+	 */
+	public void writeData(boolean current) throws IOException {
+		String datePath = "";
+		if(current) {
+			datePath = getCurrentDatePath();
+		} else {
+			datePath = getPreviousDatePath();
+		}
 		BufferedWriter output = new BufferedWriter(new FileWriter("basic/Admin.txt"));
 		for (int i = 0; i < adminList.size(); i++) {
 			output.write(adminList.get(i).toString() + "\r\n");
@@ -562,33 +798,60 @@ public class CinemaSystem {
 			output.write(ticketInfoList.get(i).toString() + "\r\n");
 		}
 		output.close();
-		output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/Ticket.txt"));
+		output = new BufferedWriter(new FileWriter(datePath+"/Ticket.txt"));
 		for (int i = 0; i < briefTicketList.size(); i++) {
 			output.write(briefTicketList.get(i).toString() + "\r\n");
 		}
 		output.close();
-		output = new BufferedWriter(new FileWriter(getCurrentDatePath()+"/Timetable.txt"));
+		output = new BufferedWriter(new FileWriter(datePath+"/Timetable.txt"));
 		for (int i = 0; i < timetableList.size(); i++) {
 			output.write(timetableList.get(i).toString() + "\r\n");
 		}
 		output.close();
 	}
 	
+	/**
+	 * get current date
+	 * @return current date as format yyyyMMdd
+	 */
 	public String getCurrentDatePath() {
 		Date date = new Date();
 		String path = String.format("%4d%02d%02d", 1900+date.getYear(), date.getMonth()+1, date.getDate());
 		return path;
 	}
 	
+	/**
+	 * get previous date
+	 * @return previous date as format yyyyMMdd
+	 */
+	public String getPreviousDatePath() {
+		Calendar calendar = Calendar.getInstance();//此时打印它获取的是系统当前时间
+        calendar.add(Calendar.DATE, -1);    //得到前一天
+        String  yestedayDate = new SimpleDateFormat("yyyyMMdd").format(calendar.getTime());
+        return yestedayDate;
+	}
+	
+	/**
+	 * calculate time
+	 * @param time start time
+	 * @param delta delta time
+	 * @return end time
+	 */
 	public String addTime(String time, int delta) {
 		int hour = Integer.parseInt(time.substring(0,2));
 		int min = Integer.parseInt(time.substring(2));
 		int deltaMin = delta;
 		int newMin = (hour * 60 + min + deltaMin) % 60;
 		int newHour = (hour * 60 + min + deltaMin) / 60;
-		return new String(newHour + "" + newMin);
+		return String.format("%04d", Integer.parseInt(newHour + "" + newMin));
 	}
 	
+	/**
+	 * compare two time
+	 * @param timeA 
+	 * @param timeB
+	 * @return whether timeA earlier than timeB, timeA later than timeB
+	 */
 	public int compareTime(String timeA, String timeB) {
 		int hourA = Integer.parseInt(timeA.substring(0, 2));
 		int hourB = Integer.parseInt(timeB.substring(0, 2));
@@ -604,7 +867,14 @@ public class CinemaSystem {
 			return 0;
 	}
 	
-	public void createFile(String date, String film, String file) {
+	/**
+	 * create file 
+	 * @param date specific date
+	 * @param film film name
+	 * @param file file name
+	 * @return whether create file successfully
+	 */
+	public boolean createFile(String date, String film, String file) {
         String separator = File.separator;
         String directory = date + separator + film;
         String fileName = file + ".txt";
@@ -613,12 +883,21 @@ public class CinemaSystem {
             f.getParentFile().mkdirs();
             try {
                 f.createNewFile();
+                return true;
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        } 
+        return false;
     }
 	
+	/**
+	 * delete file
+	 * @param date specific date 
+	 * @param film film name
+	 * @param file file name
+	 * @return whether file deleted successfully
+	 */
 	public boolean deleteFile(String date, String film, String file){     
 		String separator = File.separator;
         String directory = date + separator + film;
@@ -632,6 +911,11 @@ public class CinemaSystem {
         }     
     }    
 	
+	/**
+	 * get type from type id
+	 * @param type type id
+	 * @return type
+	 */
 	public String convertType(int type) {
 		String tickettype = "";
 		switch(type) {
@@ -651,17 +935,34 @@ public class CinemaSystem {
 		return tickettype;
 	}
 	
+	/**
+	 * convert time from hhmm to hh:mm
+	 * @param time current format as hhmm
+	 * @return new format as hh:mm
+	 */
 	public String convertTime(String time) {
 		String showtime = new String();
 		showtime = time.substring(0,2) + ":" + time.substring(2);
 		return showtime;
 	}
 	
+	/**
+	 * extract time format hhmm from format hh:mm
+	 * @param time format hh:mm
+	 * @return format hhmm
+	 */
 	public String extractTime(String time) {
 		int index = time.indexOf(":");
 		return time.substring(0, index) + time.substring(index+1);
 	}
 	
+	/**
+	 * compare two time
+	 * @param hourA target hours
+	 * @param minA target minutes
+	 * @param timetable current timetable
+	 * @return which one is earlier
+	 */
 	public int compareTime(int hourA, int minA, String timetable) {
 		int hourB = Integer.parseInt(timetable.substring(0,2));
 		int minB = Integer.parseInt(timetable.substring(2));
@@ -677,6 +978,14 @@ public class CinemaSystem {
 		}
 	}	
 	
+	/**
+	 * create seat format as one character and one digit
+	 * @param totalrow total row in that screen
+	 * @param totalcol total column in that screen
+	 * @param row row number of seat
+	 * @param col column number of seat
+	 * @return new seat format
+	 */
 	public String convertSeat(int totalrow, int totalcol, int row, int col) {
 		String seat = new String();
 		seat = (char)((totalrow-1-row) + 65) + "";
@@ -684,6 +993,11 @@ public class CinemaSystem {
 		return seat;
 	}
 	
+	/**
+	 * extract row and col of seat 
+	 * @param seat seat format which has one letter and one digit
+	 * @return row and col
+	 */
 	public int[] extractSeat(String seat) {
 		int row = seats.getRow() - 1 - (seat.charAt(0) - 65);
 		int col = Integer.parseInt(seat.substring(1))-1;
@@ -691,15 +1005,102 @@ public class CinemaSystem {
 		return res;
 	}
 	
+	/**
+	 * create a report of yesterday
+	 * @throws IOException
+	 */
+	public void createReport() throws IOException {
+		File f = new File(getCurrentDatePath()+"/"+"Ticket.txt");
+		if(f.exists()) {
+			return ;
+		}
+		createFile(getCurrentDatePath(), "", "Ticket");
+		createFile(getCurrentDatePath(), "", "Timetable");
+		try {
+			readData(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		for(int i = 0; i<briefTicketList.size(); i++) {
+			getTicket(briefTicketList.get(i).getNumber()+"", false);
+			ticketList.add(currentticket);
+		}
+		Report r = new Report(filmInfoList.size(), ticketInfoList.size());
+		String[] film = new String[filmInfoList.size()];
+		for(int i = 0; i<filmInfoList.size(); i++) {
+			film[i] = filmInfoList.get(i).getName();
+		}
+		r.setFilm(film);
+		String[] type = new String[ticketInfoList.size()];
+		for(int i = 0; i<ticketInfoList.size(); i++) {
+			type[i] = convertType(ticketInfoList.get(i).getType());
+		}
+		r.setType(type);
+		int totalticket = 0;
+		int totalmount = 0;
+		int[] salePerType = new int[ticketInfoList.size()];
+		for(int i = 0; i<ticketList.size(); i++) {
+			for(int j = 0; j<type.length; j++) {
+				if(convertType(ticketList.get(i).getType()).equals(type[j])) {
+					salePerType[j] = salePerType[j] + 1;
+					totalmount += FEE * (100 - ticketInfoList.get(j).getDiscount()) / 100.0;
+					totalticket += 1;
+				} 
+			}
+		}
+		r.setSalePerType(salePerType);
+		int[] salePerFilm = new int[filmInfoList.size()];
+		for(int i = 0; i<ticketList.size(); i++) {
+			for(int j = 0; j<film.length; j++) {
+				if(ticketList.get(i).getFilm().equals(film[j])) {
+					salePerFilm[j] = salePerFilm[j] + 1;
+				} 
+			}
+		}
+		r.setSalePerFilm(salePerFilm);
+		r.setTotalTicketNumber(totalticket);
+		r.setTotalTicketAmount(totalmount);
+		BufferedWriter output = new BufferedWriter(new FileWriter(getPreviousDatePath()+"/Report.txt"));
+		output.write(r.toString());
+		output.close();
+		writeData(false);
+	}
+
+	/**
+	 * Get report content
+	 * @param current read from current date or previous date file folder
+	 * @throws FileNotFoundException
+	 */
+	public void getReport(boolean current) throws FileNotFoundException {
+		String datePath = "";
+		if(current) {
+			datePath = getCurrentDatePath();
+		} else {
+			datePath = getPreviousDatePath();
+		}
+		Scanner reader = new Scanner(new File(datePath+"/Report.txt"));
+		while(reader.hasNextLine()) {
+			reportContent.append(reader.nextLine() + "\n");			
+		}
+		reader.close();
+	}
+	
+	/**
+	 * switch to check gate frame
+	 */
 	public void gotoGate() {
 		checkticket.setVisible(false);
 		checkgate.setLocationRelativeTo(null);
 		checkgate.setVisible(true);
 	}
 	
+	/**
+	 * switch to check ticket frame
+	 * @param number wanted ticket number
+	 */
 	public void GateToTicket(String number) {
 		try {
-			readData();
+			readData(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -716,7 +1117,7 @@ public class CinemaSystem {
 		} else {
 			checkgate.setVisible(false);
 			try {
-				getTicket(number);
+				getTicket(number, true);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -726,23 +1127,40 @@ public class CinemaSystem {
 			checkticket.film.setText(currentticket.getFilm());
 			checkticket.showtime.setText(convertTime(currentticket.getShowtime()));
 			checkticket.screen.setText(currentticket.getScreen()+"");
-			checkticket.seat.setText("Row "+currentticket.getRow()+" Col "+(currentticket.getCol()));
+			try {
+				searchScreen(currentticket.getFilm(), currentticket.getScreen(), currentticket.getShowtime());
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			checkticket.seat.setText(convertSeat(seats.getRow(), seats.getCol(), currentticket.getRow(), currentticket.getCol()));
 			if(currentticket.getIDRequired() == false) {
-				checkticket.checkID.disable();
+				checkticket.checkID.setEnabled(false);
+				checkticket.checkID.repaint();
+			} else {
+				checkticket.checkID.setEnabled(true);
+				checkticket.checkID.repaint();
 			}
 			checkticket.setLocationRelativeTo(null);
 			checkticket.setVisible(true);
 		}
 	}
 	
+	/**
+	 * switch to kiosk welcome frame
+	 */
 	public void gotoWelcome() {
 		kioskfilm.setVisible(false);
+		kioskpay.setVisible(false);
 		kioskwelcome.setLocationRelativeTo(null);
 		kioskwelcome.setVisible(true);
 	}
 	
+	/**
+	 * switch to kiosk film frame
+	 */
 	public void gotoFilm() {
 		kioskwelcome.setVisible(false);
+		kiosktime.setVisible(false);
 		String[] content = new String[filmInfoList.size()];
 		for(int i = 0; i<filmInfoList.size(); i++) {
 			content[i] = filmInfoList.get(i).getName();
@@ -773,8 +1191,13 @@ public class CinemaSystem {
 		kioskfilm.setVisible(true);
 	}
 	
+	/**
+	 * switch to kiosk time frame
+	 * @param film selected film
+	 */
 	public void gotoTime(String film) {
 		kioskfilm.setVisible(false);
+		kioskticket.setVisible(false);
 		try {
 			kiosktime.currentfilm = getFilm(film);
 			setCurrentFilm(kiosktime.currentfilm);
@@ -804,11 +1227,15 @@ public class CinemaSystem {
         kiosktime.timetable.getColumnModel().getColumn(2).setCellEditor(new JButtonEditor(new JCheckBox(), this, true));       
 	}
 	
+	/**
+	 * switch to kiosk ticket frame
+	 */
 	public void gotoTicket() {
 		kiosktime.setVisible(false);
+		kioskseat.setVisible(false);
 		int available = 0;
 		try {
-			available = availableScreen(currenttimetable.getFilmName(), currenttimetable.getShowtime());
+			available = availableScreen(currenttimetable.getFilmName(), currenttimetable.getScreen(), currenttimetable.getShowtime());
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		}
@@ -854,14 +1281,19 @@ public class CinemaSystem {
 		kioskticket.setVisible(true);
 	}
 	
+	/**
+	 * switch to kiosk seat frame
+	 */
 	public void gotoSeat() {
 		setNumber(kioskticket.number.getSelectedIndex());
 		try {
-			searchScreen(currentfilm.getName(), currenttimetable.getShowtime());
+			searchScreen(currentfilm.getName(), currenttimetable.getScreen(), currenttimetable.getShowtime());
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		kioskfinish.setVisible(false);
 		kioskticket.setVisible(false);
+		kioskpay.setVisible(false);
 		kioskseat.seats.removeAll();
 		kioskseat.seats.setLayout(new GridLayout(seats.getRow(), seats.getCol()));
 		occupy = 0;
@@ -899,12 +1331,15 @@ public class CinemaSystem {
 		kioskseat.setVisible(true);
 	}
 	
+	/**
+	 * switch to kiosk pay frame
+	 */
 	public void gotoPay() {
 		if(number!=occupy) {
 			JOptionPane.showMessageDialog(null, "Please choose your seats! " + (number - occupy) + "/" + number +"left.", "Alert", JOptionPane.ERROR_MESSAGE); 			
 			return ;
 		}
-		kioskticket.setVisible(false);
+		kioskseat.setVisible(false);
 		String tickettype = convertType(currentticketinfo.getType());
 		String[][] content = new String[number*7][2];
 		for(int i = 0; i<number; i++) {
@@ -930,7 +1365,7 @@ public class CinemaSystem {
         		content[7*i+6][1] = "";
         		if(i == number-1) {
         			content[7*i+6][0] = "Total";
-            		content[7*i+6][1] = "£"+fee*(100-currentticketinfo.getDiscount())/100.0 * number;	
+            		content[7*i+6][1] = "£"+ FEE *(100-currentticketinfo.getDiscount())/100.0 * number;	
         		}
         }
 		kioskpay.ticketModel = new DefaultTableModel(content,new String[]{"title","content"});
@@ -941,6 +1376,9 @@ public class CinemaSystem {
 		kioskpay.setVisible(true);
 	}
 	
+	/**
+	 * switch to kiosk finish frame
+	 */
 	public void gotoFinish() {
 		kioskpay.setVisible(false);
 		try { 
@@ -976,7 +1414,7 @@ public class CinemaSystem {
         		content[7*i+6][1] = "";
         		if(i == number-1) {
         			content[7*i+6][0] = "Total";
-            		content[7*i+6][1] = "£"+fee*(100-currentticketinfo.getDiscount())/100.0 * number;	
+            		content[7*i+6][1] = "£"+ FEE *(100-currentticketinfo.getDiscount())/100.0 * number;	
         		}
         }
         kioskfinish.ticketModel = new DefaultTableModel(content,new String[]{"Title","Content"});
@@ -986,6 +1424,9 @@ public class CinemaSystem {
 		kioskfinish.setVisible(true);
 	}
 	
+	/**
+	 * switch to administrator login frame
+	 */
 	public void gotoAdmin() {
 		adminlogin.setVisible(false);
 		adminlogin.username.setText("");
@@ -994,7 +1435,13 @@ public class CinemaSystem {
 		adminlogin.setVisible(true);
 	}
 	
+	/**
+	 * switch to administrator management frame
+	 * @param choose
+	 */
 	public void gotoManage(int choose) {
+		admintimetable.setVisible(false);
+		adminreport.setVisible(false);
 		if(choose == 1) {
 			int valid = -1;
 			try {
@@ -1028,8 +1475,11 @@ public class CinemaSystem {
 		adminmanage.setVisible(true);
 	}
 	
+	/**
+	 * switch to administrator timetable frame
+	 */
 	public void gotoTimetable() {
-		adminmanage.setVisible(true);
+		adminmanage.setVisible(false);
 		String[] screenContent = new String[screenList.size()+1];
 		screenContent[0] = "";
 		for(int i = 1; i<screenList.size()+1; i++) {
@@ -1084,23 +1534,35 @@ public class CinemaSystem {
 		admintimetable.setVisible(true);
 	}
 	
+	/**
+	 * switch to administrator report frame
+	 */
 	public void gotoReport() {
-		adminmanage.setVisible(true);
+		adminmanage.setVisible(false);
+		try {
+			getReport(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		adminreport.report.setText(reportContent.toString());
+		adminreport.report.setEditable(false);
 		adminreport.setLocationRelativeTo(null);
 		adminreport.setVisible(true);
-	}
+	}	
 	
 	public static void main(String args[]) {
 		CinemaSystem cs = new CinemaSystem();
 		try {
-			cs.readData();
+			cs.createReport();
+			cs.readData(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// check gate
-		//cs.gotoGate();
+		cs.gotoGate();
 		// kiosk
 		cs.gotoWelcome();
-		//cs.gotoAdmin();
+		// Admin
+		cs.gotoAdmin();
 	}
 }

@@ -1,13 +1,16 @@
 package View;
 
 import javax.swing.*;
-
-import Controller.CinemaSystem;
-import Model.Timetable;
-
+import Controller.*;
+import Model.*;
 import java.awt.*;
 import java.awt.event.*;
 
+/**
+ * Timetable confirm button and delete button
+ * @author Zhenhao Li
+ * @version v1.0
+ */
 public class JButtonEditor extends DefaultCellEditor {
 
     protected JButton button;

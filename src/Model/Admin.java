@@ -1,11 +1,19 @@
 package Model;
 
-import Controller.*;
-
+/**
+ * Administrator Model
+ * @author Yunyao Liu
+ * @version v1.0
+ */
 public class Admin {
 	private String id;
 	private String password;
 	
+	/** 
+	* <p>Title: </p> 
+	* <p>Description: </p> 
+	* ${tags} 
+	*/
 	public Admin(){
 		
 	}
@@ -30,8 +38,8 @@ public class Admin {
 	}
 	
 	/** 
-	* @Title: toString
-	* @Description: output data had the following format. 
+	* @Title toString
+	* @Description output data had the following format. 
 	* @param  null
 	* @return String
 	* @throws null

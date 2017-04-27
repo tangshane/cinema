@@ -1,9 +1,6 @@
 package View;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
+import java.awt.event.*;
 import javax.swing.*;
-
 import Controller.*;
 
 
@@ -19,13 +16,17 @@ import Controller.*;
 * THIS MACHINE, SO JIGLOO OR THIS CODE CANNOT BE USED
 * LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
 */
+/**
+ * Login frame for administrator
+ * @author Yuqian Li
+ * @version v1.0
+ */
 public class AdminReport extends javax.swing.JFrame {
 	private JLabel jLabel1;
 	private CinemaSystem cs;
+	public JTextPane report;
+	private JScrollPane jScrollPane1;
 	private JButton logout;
-	private JButton more;
-	private JButton timetable;
-	private JButton report;
 
 	public AdminReport(CinemaSystem cs) {
 		super();
@@ -41,40 +42,7 @@ public class AdminReport extends javax.swing.JFrame {
 			this.setTitle("Admin - Report");
 			{
 				jLabel1 = new JLabel("", SwingConstants.CENTER);
-				jLabel1.setText("Welcome Admin, please manage system!");
-			}
-			{
-				report = new JButton();
-				report.setText("Statistic Report");
-				report.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent evt) {
-						//System.out.println("report.actionPerformed, event="+evt);
-						//TODO add your code for report.actionPerformed
-						cs.gotoReport();
-					}
-				});
-			}
-			{
-				timetable = new JButton();
-				timetable.setText("Timetable");
-				timetable.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent evt) {
-						//System.out.println("timetable.actionPerformed, event="+evt);
-						//TODO add your code for timetable.actionPerformed
-						cs.gotoTimetable();
-					}
-				});
-			}
-			{
-				more = new JButton();
-				more.setText("More");
-				more.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent evt) {
-						//System.out.println("more.actionPerformed, event="+evt);
-						//TODO add your code for more.actionPerformed
-						JOptionPane.showMessageDialog(null, "Still Working, more to come!", "Alert", JOptionPane.INFORMATION_MESSAGE); 			
-					}
-				});
+				jLabel1.setText("Here is Yesterday's Report.");
 			}
 			{
 				logout = new JButton();
@@ -87,16 +55,21 @@ public class AdminReport extends javax.swing.JFrame {
 					}
 				});
 			}
+			{
+				jScrollPane1 = new JScrollPane();
+				{
+					report = new JTextPane();
+					jScrollPane1.setViewportView(report);
+					report.setText("jTextPane1");
+					report.setPreferredSize(new java.awt.Dimension(320, 303));
+				}
+			}
 			thisLayout.setVerticalGroup(thisLayout.createSequentialGroup()
 				.addContainerGap(19, 19)
 				.addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addGap(38)
-				.addComponent(timetable, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addGap(32)
-				.addComponent(report, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addGap(32)
-				.addComponent(more, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addGap(29)
+				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+				.addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
+				.addGap(21)
 				.addComponent(logout, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addContainerGap(25, Short.MAX_VALUE));
 			thisLayout.setHorizontalGroup(thisLayout.createSequentialGroup()
@@ -105,22 +78,13 @@ public class AdminReport extends javax.swing.JFrame {
 				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
 				        .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 314, GroupLayout.PREFERRED_SIZE)
 				        .addGap(0, 21, Short.MAX_VALUE))
-				    .addGroup(thisLayout.createSequentialGroup()
-				        .addGap(26)
-				        .addGroup(thisLayout.createParallelGroup()
-				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addComponent(report, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)
-				                .addGap(0, 21, Short.MAX_VALUE))
-				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addComponent(timetable, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)
-				                .addGap(0, 21, Short.MAX_VALUE))
-				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addComponent(more, GroupLayout.PREFERRED_SIZE, 288, GroupLayout.PREFERRED_SIZE)
-				                .addGap(0, 21, Short.MAX_VALUE))
-				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addGap(247)
-				                .addComponent(logout, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
-				                .addGap(0, 0, Short.MAX_VALUE)))))
+				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				        .addComponent(jScrollPane1, 0, 323, Short.MAX_VALUE)
+				        .addGap(0, 12, GroupLayout.PREFERRED_SIZE))
+				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				        .addGap(239)
+				        .addComponent(logout, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE)
+				        .addGap(0, 0, Short.MAX_VALUE)))
 				.addContainerGap(25, 25));
 			pack();
 			setSize(400, 300);

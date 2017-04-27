@@ -1,17 +1,16 @@
 package View;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Image;
-import java.io.File;
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
+import javax.imageio.*;
+import javax.swing.*;
+import javax.swing.table.*;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.TableCellRenderer;
-
+/**
+ * Film Poster Cell to show poster 
+ * @author Yunyao Liu
+ * @version v1.0
+ */
 public class ImageRenderer implements TableCellRenderer
 {
 	@SuppressWarnings("unchecked")
@@ -20,8 +19,8 @@ public class ImageRenderer implements TableCellRenderer
 								boolean hasFocus, int rowIndex, int columnIndex) {
 	    	if( value instanceof Image ){
 	    		JLabel jLabel = new JLabel();
-	    		jLabel.setLayout(new BorderLayout());//设置布局
-	    		jLabel.setIcon(new ImageIcon((Image)value));//给jlable设置图片
+	    		jLabel.setLayout(new BorderLayout());
+	    		jLabel.setIcon(new ImageIcon((Image)value));
 	    		return jLabel;
 	    } else if( value instanceof File ) {
 	    		try {

@@ -2,6 +2,11 @@ package Model;
 
 import java.util.Random;
 
+/**
+ * Ticket Model
+ * @author Zhekong Yang
+ * @version v1.0
+ */
 public class Ticket {
 	private static final int TICKET_DIGIT = 8;
 	private int number;

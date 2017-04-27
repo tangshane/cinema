@@ -1,31 +1,14 @@
 package View;
-import javax.swing.GroupLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.LayoutStyle;
-
-import Controller.CinemaSystem;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
+import javax.swing.*;
+import Controller.*;
+import java.awt.event.*;
+import java.io.*;
 
 /**
-* This code was edited or generated using CloudGarden's Jigloo
-* SWT/Swing GUI Builder, which is free for non-commercial
-* use. If Jigloo is being used commercially (ie, by a corporation,
-* company or business for any purpose whatever) then you
-* should purchase a license for each developer using Jigloo.
-* Please visit www.cloudgarden.com for details.
-* Use of Jigloo implies acceptance of these licensing terms.
-* A COMMERCIAL LICENSE HAS NOT BEEN PURCHASED FOR
-* THIS MACHINE, SO JIGLOO OR THIS CODE CANNOT BE USED
-* LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
-*/
+ * Check Gate II, show ticket information and check ID
+ * @author Yuqin Cui
+ * @version v1.0
+ */
 public class CheckTicket extends javax.swing.JFrame {
 	private JLabel jLabel1;
 	private CinemaSystem cs;
@@ -69,6 +52,7 @@ public class CheckTicket extends javax.swing.JFrame {
 						//System.out.println("ok.actionPerformed, event="+evt);
 						//TODO add your code for ok.actionPerformed
 						boolean check = false;
+						System.out.println(checkID.isEnabled());
 						if(checkID.isEnabled() == false) {
 							check = true;
 						} else {
@@ -187,51 +171,52 @@ public class CheckTicket extends javax.swing.JFrame {
 				    .addComponent(back, GroupLayout.Alignment.BASELINE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
 				.addContainerGap(16, 16));
 			thisLayout.setHorizontalGroup(thisLayout.createSequentialGroup()
-				.addContainerGap(89, 89)
+				.addContainerGap(26, 26)
+				.addGroup(thisLayout.createParallelGroup()
+				    .addComponent(jLabel7, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
+				    .addComponent(jLabel6, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
+				    .addComponent(jLabel5, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
+				    .addComponent(jLabel4, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
+				    .addComponent(jLabel3, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
+				    .addComponent(jLabel2, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE))
 				.addGroup(thisLayout.createParallelGroup()
 				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				        .addGroup(thisLayout.createParallelGroup()
-				            .addComponent(jLabel7, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 43, GroupLayout.PREFERRED_SIZE)
-				            .addComponent(jLabel6, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 43, GroupLayout.PREFERRED_SIZE)
-				            .addComponent(jLabel4, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 43, GroupLayout.PREFERRED_SIZE)
-				            .addComponent(jLabel3, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 43, GroupLayout.PREFERRED_SIZE))
-				        .addGap(0, 0, Short.MAX_VALUE)
-				        .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 114, GroupLayout.PREFERRED_SIZE)
-				        .addGap(61))
-				    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				        .addGroup(thisLayout.createParallelGroup()
-				            .addComponent(jLabel5, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
-				            .addGroup(thisLayout.createSequentialGroup()
-				                .addGap(0, 0, Short.MAX_VALUE)
-				                .addComponent(jLabel2, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)))
-				        .addGap(0, 38, GroupLayout.PREFERRED_SIZE)
+				        .addComponent(ok, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
+				        .addGap(23)
 				        .addComponent(back, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
-				        .addGap(49))
+				        .addGap(0, 100, Short.MAX_VALUE))
 				    .addGroup(thisLayout.createSequentialGroup()
-				        .addGap(25)
+				        .addPreferredGap(ok, checkID, LayoutStyle.ComponentPlacement.INDENT)
 				        .addGroup(thisLayout.createParallelGroup()
 				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addComponent(ok, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
-				                .addGap(11)
-				                .addGroup(thisLayout.createParallelGroup()
-				                    .addGroup(thisLayout.createSequentialGroup()
-				                        .addComponent(seat, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE))
-				                    .addGroup(thisLayout.createSequentialGroup()
-				                        .addComponent(screen, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE))
-				                    .addGroup(thisLayout.createSequentialGroup()
-				                        .addComponent(showtime, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE))
-				                    .addGroup(thisLayout.createSequentialGroup()
-				                        .addComponent(film, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE))
-				                    .addGroup(thisLayout.createSequentialGroup()
-				                        .addComponent(type, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE))
-				                    .addGroup(thisLayout.createSequentialGroup()
-				                        .addComponent(number, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE)))
-				                .addGap(0, 0, Short.MAX_VALUE))
-				            .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
-				                .addPreferredGap(ok, checkID, LayoutStyle.ComponentPlacement.INDENT)
 				                .addComponent(checkID, GroupLayout.PREFERRED_SIZE, 144, GroupLayout.PREFERRED_SIZE)
-				                .addGap(0, 37, Short.MAX_VALUE)))))
-				.addContainerGap(93, 93));
+				                .addGap(0, 91, Short.MAX_VALUE))
+				            .addGroup(thisLayout.createSequentialGroup()
+				                .addPreferredGap(checkID, jLabel1, LayoutStyle.ComponentPlacement.INDENT)
+				                .addGroup(thisLayout.createParallelGroup()
+				                    .addGroup(GroupLayout.Alignment.LEADING, thisLayout.createSequentialGroup()
+				                        .addComponent(jLabel1, GroupLayout.PREFERRED_SIZE, 114, GroupLayout.PREFERRED_SIZE)
+				                        .addGap(0, 109, Short.MAX_VALUE))
+				                    .addGroup(thisLayout.createSequentialGroup()
+				                        .addPreferredGap(jLabel1, seat, LayoutStyle.ComponentPlacement.INDENT)
+				                        .addGroup(thisLayout.createParallelGroup()
+				                            .addGroup(thisLayout.createSequentialGroup()
+				                                .addComponent(seat, GroupLayout.PREFERRED_SIZE, 211, GroupLayout.PREFERRED_SIZE)
+				                                .addGap(0, 0, Short.MAX_VALUE))
+				                            .addGroup(thisLayout.createSequentialGroup()
+				                                .addComponent(screen, GroupLayout.PREFERRED_SIZE, 211, GroupLayout.PREFERRED_SIZE)
+				                                .addGap(0, 0, Short.MAX_VALUE))
+				                            .addGroup(thisLayout.createSequentialGroup()
+				                                .addComponent(showtime, GroupLayout.PREFERRED_SIZE, 211, GroupLayout.PREFERRED_SIZE)
+				                                .addGap(0, 0, Short.MAX_VALUE))
+				                            .addGroup(thisLayout.createSequentialGroup()
+				                                .addComponent(film, GroupLayout.PREFERRED_SIZE, 211, GroupLayout.PREFERRED_SIZE)
+				                                .addGap(0, 0, Short.MAX_VALUE))
+				                            .addGroup(thisLayout.createSequentialGroup()
+				                                .addComponent(type, GroupLayout.PREFERRED_SIZE, 211, GroupLayout.PREFERRED_SIZE)
+				                                .addGap(0, 0, Short.MAX_VALUE))
+				                            .addComponent(number, GroupLayout.Alignment.LEADING, 0, 211, Short.MAX_VALUE))))))))
+				.addContainerGap(41, 41));
 			pack();
 			setSize(400, 300);
 		} catch (Exception e) {

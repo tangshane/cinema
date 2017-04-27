@@ -1,0 +1,15 @@
+The total sale of each film.
+KONG: SKULL ISLAND: 6.
+LOGAN: 0.
+BEAUTY AND THE BEAST: 0.
+MOONLIGHT: 0.
+LA LA LAND: 0.
+Test: 0.
+Test: 0.
+Each type of ticket sold:
+Child: 0.
+Adult: 2.
+Senior: 0.
+Student: 4.
+Total number of tickets sold: 0.
+Total amount of money earned: 0.0.
